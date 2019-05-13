@@ -9,6 +9,13 @@ export default class ChatScreen extends React.Component {
 
     static navigationOptions = ({ navigation }) => {
         return {
+            headerTintColor: '#fff',
+            headerStyle: {
+                backgroundColor: '#1f5d64',
+              },
+              headerTitleStyle: {
+                fontWeight: 'normal',
+              },
             title: navigation.getParam('name', null)
         }
     }

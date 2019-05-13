@@ -1,6 +1,7 @@
 const User = {
     phone: null,
-    name: null
+    name: null,
+    partnerPhone: null
 
 }
 
