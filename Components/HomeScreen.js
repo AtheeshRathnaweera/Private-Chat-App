@@ -5,10 +5,11 @@ import User from '../User';
 
 import firebase from 'firebase';
 
-import { YellowBox } from 'react-native';
+import { YellowBox, SafeAreaView } from 'react-native';
 import _ from 'lodash';
 
 import { Container, Header, Content, Body, Left, Right, Button, Icon, Title, Thumbnail } from 'native-base';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class HomeScreen extends React.Component {
 
@@ -56,7 +57,8 @@ export default class HomeScreen extends React.Component {
 
     state = {
         users: [],
-        partnerPhone: ''
+        partUserName: 'user not found',
+        partnerPhone: 'partner not found'
     }
 
 
@@ -70,6 +72,7 @@ export default class HomeScreen extends React.Component {
                 return true;
             } else {
                 console.warn("Not exists!");
+                return false;
             }
 
             // TODO: Handle that users do not exist
@@ -77,22 +80,6 @@ export default class HomeScreen extends React.Component {
 
     }
 
-    getPartnerNum = async () => {
-        try {
-          const phone = await AsyncStorage.getItem('userPhone');
-
-          if(phone !== null) {
-            this.setState( { partnerPhone: "qvhbw"} );
-            console.warn("Done . Data found");
-            // value previously stored
-          }
-        } catch(e) {
-            console.warn("Error "+e.message);
-          // error reading value
-        }
-      }
-
-   
 
     async componentWillMount() {
 
@@ -104,7 +91,48 @@ export default class HomeScreen extends React.Component {
             }
         };
 
-        await this.getPartnerNum();
+        //  await this.getPartnerNum();
+        try {
+
+            const foundPartPhone = await AsyncStorage.getItem('partnerPhone');
+
+            if (foundPartPhone !== null) {
+                //console.warn("Done . Data found" + foundPartPhone);
+
+                firebase.database().ref('users/' + foundPartPhone).once('value').then(snap => {
+
+                    if (snap.exists()) {
+
+                        let stringifyObject = JSON.stringify(snap)
+                        let obj = JSON.parse(stringifyObject);
+                        obj.key = snap.key
+                        var partName = JSON.stringify(obj.name);
+
+                        //console.warn(partName);
+
+                        this.setState({
+                            partUserName: partName,
+                            partnerPhone: foundPartPhone
+                        });
+                        // TODO: Handle that users do exist
+
+                    } else {
+                        console.warn("Not exists!");
+                    }
+
+                    // TODO: Handle that users do not exist
+                });
+
+
+            } else {
+                console.warn("Not. Data Not found");
+            }
+
+        } catch (e) {
+            console.warn("Error " + e.message);
+            // error reading value
+        }
+
 
 
         //let dbRef = firebase.database().ref('users');
@@ -123,11 +151,6 @@ export default class HomeScreen extends React.Component {
         //  }
         // })
     }
-
-   
-
-
-
 
     renderRow = ({ item }) => {
         return (
@@ -163,31 +186,29 @@ export default class HomeScreen extends React.Component {
         let { height, width } = Dimensions.get('window');
         return (
 
-            <Container style={{ flex: 1, backgroundColor: '#1f5d64', alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
 
+
+            <Container style={{ flex: 1, backgroundColor: '#1f5d64', alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
 
                 <Content contentContainerStyle={{ alignItems: 'center' }}  >
 
                     <TouchableOpacity
-                        onPress={() => this.props.navigation.navigate('chatScreen', item) }
-                        style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1 }]}
-
-                        
-                    >
+                        onPress={() => this.props.navigation.navigate('chatScreen', item)}
+                        style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1 }]}>
 
                         <Thumbnail large source={require('../images/me.jpg')} style={styles.profileImg} />
+
                     </TouchableOpacity>
 
-                    <Text style={{ fontSize: 20, color: '#fff', marginTop: 10, fontStyle: 'italic' }}>atheesh27</Text>
+                    <Text style={{ fontSize: 22, color: '#fff', marginTop: 10, fontStyle: 'italic' }}>{this.state.partUserName}</Text>
 
-
-
-
-
+                    <Text style={{ fontSize: 13, color: '#fff' }}>{this.state.partnerPhone}</Text>
 
                 </Content>
 
             </Container>
+
+          
 
 
         )

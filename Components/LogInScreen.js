@@ -37,20 +37,21 @@ export default class LogInScreen extends React.Component {
       //Save the user
       try {
 
-        U
         await AsyncStorage.setItem('userPhone', this.state.phone);
         await AsyncStorage.setItem('partnerPhone', this.state.partnerNum);
         await AsyncStorage.setItem('userName', this.state.name);
 
-
         User.phone = this.state.phone;
 
-        firebase.database().ref('users/' + User.phone).set({ name: this.state.name });// Save user name in firebase under the phone number
+        firebase.database().ref('users/' + User.phone).set({ name: this.state.name, userImageUrl: ''});//Save user name in firebase under the phone number
+
+        //console.warn("Saved successfully");
 
         this.props.navigation.navigate('App');
+   
       } catch (e) {
         // saving error
-        Console.log(e.message);
+        console.warn(e.message);
       }
     }
   }
@@ -85,7 +86,7 @@ export default class LogInScreen extends React.Component {
           onChangeText={this.handleChange('partnerNum')} />
 
         <Button rounded 
-          style={{ width: 150, justifyContent: 'center', alignSelf: 'center', marginTop:10, backgroundColor: '#DAA520',elevation:10 }}
+          style={{ width: 150, justifyContent: 'center', alignSelf: 'center', marginTop:10, backgroundColor: '#DAA520',elevation:7 }}
           onPress={this.submitForm}>
 
           <Text style={{ color: '#F5FCFF', fontSize: 16 }}>Start chatting</Text>

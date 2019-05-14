@@ -4,18 +4,20 @@ import {
     StatusBar,
     View,
     Text,
-    StyleSheet
+    StyleSheet,
+    Alert
 } from 'react-native';
 
 import User from '../User';
 import AsyncStorage from '@react-native-community/async-storage';
 
 import firebase from 'firebase';
+import NetInfo from "@react-native-community/netinfo";
 
 export default class AuthLoadingScreen extends React.Component {
     constructor(props) {
         super(props);
-        this._bootstrapAsync();
+        this.testNetCheck();
     }
 
     componentWillMount() {
@@ -35,7 +37,62 @@ export default class AuthLoadingScreen extends React.Component {
     }
 
     // Fetch the token from storage then navigate to our appropriate place
-    _bootstrapAsync = async () => {
+    testNetCheck = async () => {
+        const listener = data => {
+            //console.warn("Connection type", data.type);
+            //console.warn("Connection effective type", data.effectiveType);
+
+            if (data.type === "cellular" || data.type === "wifi" || data.type === "wimax") {
+
+                //console.warn("second if started.");
+
+                if (data.type === "cellular") {
+
+                    if(data.effectiveType === "unknown"){
+                        this.showTheAlert();
+                        //console.warn("Network unknown.");
+                    }else{
+                        NetInfo.removeEventListener('connectionChange', listener);
+                        this.startTheApp();
+                    }
+                   
+
+                } else {
+                    //console.warn("Network connected app is started.");
+                    NetInfo.removeEventListener('connectionChange', listener);
+                    this.startTheApp();
+
+                }
+
+            } else {
+                this.showTheAlert();
+            }
+
+
+          };
+          
+          // Subscribe
+          const subscription = NetInfo.addEventListener('connectionChange', listener);
+          NetInfo.isConnected.removeEventListener('connectionChange', listener);
+
+          // Unsubscribe through remove
+          //subscription.remove();
+    };
+
+
+    showTheAlert = () => {
+        Alert.alert(
+            "Connection Error",
+            "Please check your connection availability!",
+            [
+                { text: "Ok", style: 'cancle'}
+            ]
+        )
+
+    }
+
+    startTheApp = async () => {
+        
         User.phone = await AsyncStorage.getItem('userPhone');
         this.props.navigation.navigate(User.phone ? 'App' : 'Auth');//Go to the stack if phone number is available
     };
@@ -44,7 +101,7 @@ export default class AuthLoadingScreen extends React.Component {
     render() {
         return (
             <View style={styles.container}>
-        
+
                 <ActivityIndicator />
                 <StatusBar barStyle="default" />
             </View>
