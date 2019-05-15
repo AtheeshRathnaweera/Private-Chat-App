@@ -1,11 +1,11 @@
 import React from 'react';
-import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
+import { Alert, StyleSheet, Text, View, TextInput, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import User from '../User';
 
 import firebase from 'firebase';
 
-import { Button } from 'native-base';
+import { Button, Toast } from 'native-base';
 
 
 export default class LogInScreen extends React.Component {
@@ -31,24 +31,38 @@ export default class LogInScreen extends React.Component {
       Alert.alert("Error", "Phone number is not valid")
     } else if (this.state.name.length < 3) {
       Alert.alert("Error", "Name should include atleast three letters")
-    } else if(this.state.partnerNum.length < 10){
+    } else if (this.state.partnerNum.length < 10) {
       Alert.alert("Error", "Partner's phone number is not valid")
-    }else{
+    } else {
       //Save the user
       try {
 
         await AsyncStorage.setItem('userPhone', this.state.phone);
         await AsyncStorage.setItem('partnerPhone', this.state.partnerNum);
         await AsyncStorage.setItem('userName', this.state.name);
+        await AsyncStorage.setItem('userStatus', 'no status');
+        await AsyncStorage.setItem('userImageUrl', '');
 
         User.phone = this.state.phone;
+        User.name = this.state.name;
+        User.status = 'no status';
+        User.imageUrl = 'not set';
 
-        firebase.database().ref('users/' + User.phone).set({ name: this.state.name, userImageUrl: ''});//Save user name in firebase under the phone number
+        firebase.database().ref('users/' + User.phone).set({ User }, function (error) {
+          if (error) {
+            // The write failed...
+            Alert.alert("Unexpected error", "This problem may occur because of the failure of your connection. Please check and try again.");
+          } else {
+            this.props.navigation.navigate('App');
+          }
+        }.bind(this));
+
+
 
         //console.warn("Saved successfully");
 
-        this.props.navigation.navigate('App');
-   
+
+
       } catch (e) {
         // saving error
         console.warn(e.message);
@@ -57,6 +71,7 @@ export default class LogInScreen extends React.Component {
   }
 
   render() {
+    let { height, width } = Dimensions.get('window');
     return (
       <View style={styles.container}>
 
@@ -75,8 +90,6 @@ export default class LogInScreen extends React.Component {
           value={this.state.name}
           onChangeText={this.handleChange('name')} />
 
-          
-
         <TextInput
           placeholder="Partner's phone number"
           placeholderTextColor='#A9A9A9'
@@ -85,8 +98,8 @@ export default class LogInScreen extends React.Component {
           value={this.state.partnerNum}
           onChangeText={this.handleChange('partnerNum')} />
 
-        <Button rounded 
-          style={{ width: 150, justifyContent: 'center', alignSelf: 'center', marginTop:10, backgroundColor: '#DAA520',elevation:7 }}
+        <Button rounded
+          style={{ width: width * 0.8, justifyContent: 'center', alignSelf: 'center', marginTop: 10, backgroundColor: '#DAA520', elevation: 7 }}
           onPress={this.submitForm}>
 
           <Text style={{ color: '#F5FCFF', fontSize: 16 }}>Start chatting</Text>
@@ -113,8 +126,8 @@ const styles = StyleSheet.create({
     width: '90%',
     marginBottom: 7,
     borderRadius: 5,
-    elevation:3,
+    elevation: 3,
     backgroundColor: '#1f5d64',
-    
+
   }
 });

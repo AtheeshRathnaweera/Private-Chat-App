@@ -1,12 +1,34 @@
 import React from 'react';
-import { View, Text, SafeAreaView, StyleSheet, TextInput, Alert, TouchableOpacity, Dimensions } from 'react-native';
+import { View, SafeAreaView, StyleSheet, TextInput, Alert, TouchableOpacity, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import User from '../User';
 
-import { Container, Button, Content, Thumbnail, Input, Item, Form, Label } from 'native-base';
+import { Container, Button, Content, Thumbnail, Input, Item, Form, Label, Text } from 'native-base';
 import firebase from 'firebase';
 
+
 export default class ProfileScreen extends React.Component {
+
+    async componentDidMount() {
+
+        const uName = await AsyncStorage.getItem('userName');
+        const uStatus = await AsyncStorage.getItem('userStatus');
+        const uImUrl = await AsyncStorage.getItem('userImageUrl');
+
+        User.name = uName;
+        User.status = uStatus;
+        User.imageUrl = uImUrl;
+
+
+        this.setState({
+            name: uName,
+            status: uStatus,
+            userImageUrl: uImUrl,
+
+        });
+
+        //console.warn("data" + User.name + " " + User.status + " " + User.imageUrl);
+    }
 
     static navigationOptions = {
         title: 'Update Profile',
@@ -23,28 +45,74 @@ export default class ProfileScreen extends React.Component {
     }
 
     state = {
-        name: User.name
+        name: '',
+        status: '',
+        userImageUrl: '',
+        dataSaved: false,
+        saveButtonColor: '#DAA520'
+
     }
 
     handleChange = key => val => {
         this.setState({ [key]: val })
     }
 
-    changeName = async () => {
+    saveData = async () => {
         if (this.state.name.length < 3) {
             Alert.alert('Error', 'Please enter valid name.');
-        } else if (User.name !== this.state.name) {
-            firebase.database().ref('users').child(User.phone).set({ name: this.state.name });
-            User.name = this.state.name;
-            Alert.alert('Success', 'Name changed successfully.');
+        } else {
+
+            var updates = {};
+            var changesFound = false
+            // updates['/posts/' + newPostKey] = postData;
+            // updates['/user-posts/' + uid + '/' + newPostKey] = postData;
+
+            // return firebase.database().ref().update(updates);
+
+            if (this.state.name !== User.name) {
+                await AsyncStorage.setItem('userName', this.state.name);//Update the data in async storage
+                updates['users/' + User.phone + '/User/name'] = this.state.name;
+                changesFound = true
+
+            }
+            if (this.state.status !== User.status) {
+                await AsyncStorage.setItem('userStatus', this.state.status);
+                updates['users/' + User.phone + '/User/status'] = this.state.status;
+                changesFound = true
+            }
+            if (this.state.userImageUrl !== User.imageUrl) {
+                await AsyncStorage.setItem('userImageUrl', this.state.userImageUrl);
+                updates['users/' + User.phone + '/User/imageUrl'] = this.state.userImageUrl;
+                changesFound = true
+            }
+
+            if (changesFound) {
+                console.warn("changes found and will save");
+                changesFound = false
+                //firebase.database().ref('users').child(User.phone).update({ User });
+                firebase.database().ref().update(updates, function (error) {
+                    if (error) {
+                        Alert.alert("Unexpected error", "This problem may occur because of the failure of your connection. Please check and try again.");
+                    } else {
+                        this.setState({ dataSaved: true })
+                        this.setState({ saveButtonColor: '#3F602B' })
+                    }
+                }.bind(this));
+            } else {
+                console.warn("nothing to save");
+            }
         }
 
     }
 
+    changePicture () {
+            console.warn("Change picture method called.");
+    }
+
+
     logOut = async () => {
         await AsyncStorage.clear();
         this.props.navigation.navigate('Auth');
-        Alert.alert("LogOut", "Button pressed.");
 
     }
 
@@ -72,6 +140,13 @@ export default class ProfileScreen extends React.Component {
 
                         </TouchableOpacity>
 
+                        <TouchableOpacity
+                        onPress ={this.changePicture}>
+                            <Text style={{fontStyle: 'italic', fontSize: 14, color: '#EAC117', marginBottom: 10, marginTop: 3 , textDecorationLine: 'underline'}}>
+                                Change display picture
+                            </Text>
+                        </TouchableOpacity>
+
 
                         <Text style={{ fontSize: 16, color: '#fff', marginBottom: 15, marginTop: 3 }}>
                             {User.phone}
@@ -86,17 +161,18 @@ export default class ProfileScreen extends React.Component {
                             multiline={true}
                             numberOfLines={4}
                             style={styles.input}
-                            value={this.state.name}
-                            onChangeText={this.handleChange('name')} />
+                            value={this.state.status}
+                            onChangeText={this.handleChange('status')} />
 
                         <Button rounded
                             style={{
-                                width: width * 0.9, justifyContent: 'center', alignSelf: 'center',
-                                marginTop: 8, backgroundColor: '#DAA520', elevation: 5
-                            }}
-                            onPress={this.changeName}>
 
-                            <Text style={{ color: '#F5FCFF', fontSize: 16 }}>Save changes</Text>
+                                width: width * 0.9, justifyContent: 'center', alignSelf: 'center',
+                                marginTop: 8, backgroundColor: this.state.saveButtonColor, elevation: 5
+                            }}
+                            onPress={this.state.dataSaved ? console.log("Once saved") : this.saveData}>
+
+                            <Text style={{ color: '#F5FCFF', fontSize: 14 }}>{this.state.dataSaved ? "Saved successfully " : "Save changes"}</Text>
 
                         </Button>
 
@@ -107,7 +183,7 @@ export default class ProfileScreen extends React.Component {
                             }}
                             onPress={this.logOut}>
 
-                            <Text style={{ color: '#F5FCFF', fontSize: 16 }}>Log out</Text>
+                            <Text style={{ color: '#F5FCFF', fontSize: 14 }}>Log out</Text>
 
                         </Button>
 
