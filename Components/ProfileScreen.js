@@ -11,6 +11,7 @@ export default class ProfileScreen extends React.Component {
 
     async componentDidMount() {
 
+  
         const uName = await AsyncStorage.getItem('userName');
         const uStatus = await AsyncStorage.getItem('userStatus');
         const uImUrl = await AsyncStorage.getItem('userImageUrl');
@@ -105,8 +106,8 @@ export default class ProfileScreen extends React.Component {
 
     }
 
-    changePicture () {
-            console.warn("Change picture method called.");
+    changePicture() {
+        console.warn("Change picture method called.");
     }
 
 
@@ -141,8 +142,8 @@ export default class ProfileScreen extends React.Component {
                         </TouchableOpacity>
 
                         <TouchableOpacity
-                        onPress ={this.changePicture}>
-                            <Text style={{fontStyle: 'italic', fontSize: 14, color: '#EAC117', marginBottom: 10, marginTop: 3 , textDecorationLine: 'underline'}}>
+                            onPress={this.changePicture}>
+                            <Text style={{ fontStyle: 'italic', fontSize: 14, color: '#EAC117', marginBottom: 10, marginTop: 3, textDecorationLine: 'underline' }}>
                                 Change display picture
                             </Text>
                         </TouchableOpacity>

@@ -57,6 +57,7 @@ export default class HomeScreen extends React.Component {
 
     state = {
         users: [],
+        ownerPhone: '',
         partUserName: 'user not found',
         partnerPhone: 'partner not found',
         partnerStatus: 'No status',
@@ -84,7 +85,7 @@ export default class HomeScreen extends React.Component {
 
 
     async componentWillMount() {
-
+       
         YellowBox.ignoreWarnings(['Setting a timer']);
         const _console = _.clone(console);
         console.warn = message => {
@@ -97,6 +98,7 @@ export default class HomeScreen extends React.Component {
         try {
 
             const foundPartPhone = await AsyncStorage.getItem('partnerPhone');
+            const userPhone = await AsyncStorage.getItem('userPhone');
 
             if (foundPartPhone !== null) {
                 //console.warn("Done . Data found" + foundPartPhone);
@@ -110,16 +112,20 @@ export default class HomeScreen extends React.Component {
                         obj.key = snap.key
                         var partName = JSON.stringify(obj.name);
                         var partStatus = JSON.stringify(obj.status);
+
                         var partImgUr = JSON.stringify(obj.imageUrl);
 
-                        //console.warn(partName);
 
                         this.setState({
+                           ownerPhone: userPhone,
                             partUserName: partName,
                             partnerPhone: foundPartPhone,
                             partStatus: partStatus,
-                            partnerImgUrl: partImgUr 
+                            partnerImgUrl: partImgUr
+                           
                         });
+
+                        
                         // TODO: Handle that users do exist
 
                     } else {
@@ -190,6 +196,7 @@ export default class HomeScreen extends React.Component {
 
     render() {
         let { height, width } = Dimensions.get('window');
+        const uri = "https://facebook.github.io/react-native/docs/assets/favicon.png";
         return (
 
             <Container style={{ flex: 1, backgroundColor: '#1f5d64', alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
@@ -198,10 +205,10 @@ export default class HomeScreen extends React.Component {
 
 
                     <TouchableOpacity
-                        onPress={() => this.props.navigation.navigate('chatScreen', item)}
+                       // onPress={() => this.props.navigation.navigate('chatScreen', item)}
                         style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, marginTop: 10 }]}>
 
-                        <Thumbnail large source={require('../images/me.jpg')} style={styles.profileImg} />
+                        <Thumbnail large source={{ uri: this.state.partnerImgUrl}} style={styles.profileImg} />
 
                     </TouchableOpacity>
 
@@ -216,7 +223,9 @@ export default class HomeScreen extends React.Component {
                                 width: width * 0.9, justifyContent: 'center', alignSelf: 'center',
                                 marginTop: 15, backgroundColor: '#B8860B', elevation: 6
                             }}
-                            onPress={this.changeName}>
+                            onPress={() => this.props.navigation.navigate('chatScreen', { 'personPhone': this.state.partnerPhone, 
+                                                                        'personName': this.state.partUserName,
+                                                                        'ownerPhone' : this.state.ownerPhone})}>
 
                             <Text style={{ color: '#F5FCFF', fontSize: 16 }}>Open conversation</Text>
 

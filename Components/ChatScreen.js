@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, SafeAreaView, TextInput, StyleSheet, TouchableOpacity, FlatList, Dimensions, KeyboardAvoidingView } from 'react-native';
+import { View, SafeAreaView, TextInput, StyleSheet, TouchableOpacity, FlatList, Dimensions, KeyboardAvoidingView } from 'react-native';
 
 import User from '../User';
 
 import firebase from 'firebase';
+import { Thumbnail, Button, Icon, Text } from 'native-base'
 
 export default class ChatScreen extends React.Component {
 
@@ -12,10 +13,10 @@ export default class ChatScreen extends React.Component {
             headerTintColor: '#fff',
             headerStyle: {
                 backgroundColor: '#1f5d64',
-              },
-              headerTitleStyle: {
+            },
+            headerTitleStyle: {
                 fontWeight: 'normal',
-              },
+            },
             title: navigation.getParam('name', null)
         }
     }
@@ -24,8 +25,9 @@ export default class ChatScreen extends React.Component {
         super(props);
         this.state = {
             person: {
-                name: props.navigation.getParam('name'),
-                phone: props.navigation.getParam('phone')
+                name: props.navigation.getParam('personName'),
+                phone: props.navigation.getParam('personPhone'),
+                ownerPhone: props.navigation.getParam('ownerPhone')
             },
             textMessage: '',
             messageList: []
@@ -34,7 +36,7 @@ export default class ChatScreen extends React.Component {
     }
 
     componentWillMount() {
-        firebase.database().ref('messages').child(User.phone).child(this.state.person.phone)
+        firebase.database().ref('messages').child(this.state.person.ownerPhone).child(this.state.person.phone)
             .on('child_added', (value) => {
                 this.setState((prevState) => {
                     return {
@@ -102,8 +104,6 @@ export default class ChatScreen extends React.Component {
         let { height, width } = Dimensions.get('window');
         return (
             <SafeAreaView>
-
-
                 <FlatList
                     inverted
 
@@ -113,9 +113,7 @@ export default class ChatScreen extends React.Component {
                     keyExtractor={(item, index) => index.toString()} />
 
                 <KeyboardAvoidingView behavior="padding" enabled>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 5, height: height * 0.1 }}>
-
-
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 5 }}>
                         <TextInput
                             placeholder="Type message..."
                             style={styles.input}
@@ -123,7 +121,10 @@ export default class ChatScreen extends React.Component {
                             onChangeText={this.handleChanges('textMessage')} />
 
                         <TouchableOpacity onPress={this.sendMessage} style={{ paddingBottom: 10, marginLeft: 5 }}>
-                            <Text style={styles.btnText}>Send</Text>
+                            <Button>
+
+                                <Text>Home</Text>
+                            </Button>
 
                         </TouchableOpacity>
 

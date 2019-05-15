@@ -36,18 +36,20 @@ export default class LogInScreen extends React.Component {
     } else {
       //Save the user
       try {
-
+        console.warn("Saving method started. ")
+  
         await AsyncStorage.setItem('userPhone', this.state.phone);
         await AsyncStorage.setItem('partnerPhone', this.state.partnerNum);
         await AsyncStorage.setItem('userName', this.state.name);
         await AsyncStorage.setItem('userStatus', 'no status');
-        await AsyncStorage.setItem('userImageUrl', '');
-
+        await AsyncStorage.setItem('userImageUrl','not set');
+  
         User.phone = this.state.phone;
         User.name = this.state.name;
         User.status = 'no status';
         User.imageUrl = 'not set';
-
+      
+  
         firebase.database().ref('users/' + User.phone).set({ User }, function (error) {
           if (error) {
             // The write failed...
@@ -56,18 +58,20 @@ export default class LogInScreen extends React.Component {
             this.props.navigation.navigate('App');
           }
         }.bind(this));
-
-
-
-        //console.warn("Saved successfully");
-
-
-
+  
       } catch (e) {
         // saving error
         console.warn(e.message);
       }
+
+
+     
     }
+  }
+
+  savingStuff = async() => {
+   
+    
   }
 
   render() {
