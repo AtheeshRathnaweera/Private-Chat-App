@@ -1,10 +1,13 @@
 import React from 'react';
-import { View, SafeAreaView, TextInput, StyleSheet, TouchableOpacity, FlatList, Dimensions, KeyboardAvoidingView } from 'react-native';
+import { View, SafeAreaView, Text, TextInput, StyleSheet, Keyboard, FlatList, Dimensions, KeyboardAvoidingView } from 'react-native';
 
 import User from '../User';
 
 import firebase from 'firebase';
-import { Thumbnail, Button, Icon, Text } from 'native-base'
+import { Button, Icon, Right, Header } from 'native-base'
+
+import AsyncStorage from '@react-native-community/async-storage';
+
 
 export default class ChatScreen extends React.Component {
 
@@ -17,7 +20,7 @@ export default class ChatScreen extends React.Component {
             headerTitleStyle: {
                 fontWeight: 'normal',
             },
-            title: navigation.getParam('name', null)
+            title: navigation.getParam('personName', null)
         }
     }
 
@@ -30,12 +33,47 @@ export default class ChatScreen extends React.Component {
                 ownerPhone: props.navigation.getParam('ownerPhone')
             },
             textMessage: '',
-            messageList: []
+            messageList: [],
+            normalScreenHeight: 640,
+            heightWhenKeyOpened: 340,
+            tempHeight: 0,
+            screenMultiple: 0.79
         }
+        this.getHeightWhenKeyOpened()
+        
 
     }
 
+    getHeightWhenKeyOpened = async() => {
+        console.warn("Height getting method started.");
+
+        const normalHeight = await AsyncStorage.getItem('normalScreenHeight');
+        const heightWhenKey = await AsyncStorage.getItem('heightWhenKeyOpened');
+
+        this.setState({
+            normalScreenHeight: normalHeight,
+            heightWhenKeyOpened: heightWhenKey,
+            tempHeight: normalHeight
+
+        })
+
+
+    }
+
+    componentDidMount() {
+        this.keyboardDidShowListener = Keyboard.addListener(
+            'keyboardDidShow',
+            this._keyboardDidShow,
+        );
+        this.keyboardDidHideListener = Keyboard.addListener(
+            'keyboardDidHide',
+            this._keyboardDidHide,
+        );
+       
+    }
+
     componentWillMount() {
+     
         firebase.database().ref('messages').child(this.state.person.ownerPhone).child(this.state.person.phone)
             .on('child_added', (value) => {
                 this.setState((prevState) => {
@@ -44,6 +82,7 @@ export default class ChatScreen extends React.Component {
                     }
                 })
             })
+
     }
 
     handleChanges = key => val => {
@@ -65,6 +104,9 @@ export default class ChatScreen extends React.Component {
     }
 
     sendMessage = async () => {
+
+        this.listView.scrollToEnd();
+
         if (this.state.textMessage.length > 0) {
             let msgId = firebase.database().ref('messages').child(User.phone).child(this.state.person.phone).push().key;
             let updates = {};
@@ -82,55 +124,86 @@ export default class ChatScreen extends React.Component {
 
     }
 
+
+    componentWillUnmount() {
+        this.keyboardDidShowListener.remove();
+        this.keyboardDidHideListener.remove();
+    }
+
+    _keyboardDidShow = (e) => {
+        this.listView.scrollToEnd();
+
+        //console.warn("Keyboard show " + this.state.keyboardOpened + " " + shortHeight + " normal: " + normalHeight + " " + keyboardHeight);
+
+        this.setState({
+            tempHeight: this.state.heightWhenKeyOpened,
+            screenMultiple: 0.8
+        })
+    }
+
+    _keyboardDidHide = () => {
+        this.listView.scrollToEnd();
+
+        this.setState({
+            tempHeight: this.state.normalScreenHeight,
+            screenMultiple: 0.79
+        });
+        //console.warn("Keyboard hide" + this.state.keyboardOpened);
+    }
+
     renderRow = ({ item }) => {
         return (
             <View style={{
                 flexDirection: 'row',
                 width: '60%',
+                paddingBottom: 2,
+                paddingTop: 2,
                 alignSelf: item.from === User.phone ? 'flex-end' : 'flex-start',
                 backgroundColor: item.from === User.phone ? '#00897b' : '#7cb342',
                 borderRadius: 5,
-                marginBottom: 10
+                marginBottom: 4
             }}>
 
-                <Text style={{ color: '#fff', padding: 7, fontSize: 16 }}>
+                <Text multiline={true} style={{ color: '#fff', padding: 7, fontSize: 16 }}>
                     {item.message}
                 </Text>
-                <Text style={{ color: '#eee', padding: 3, fontSize: 11 }}>{this.convertTime(item.time)}</Text>
+                <Right style={{
+                    flexDirection: 'column',
+                    justifyContent: 'flex-start',
+                }}>
+                    <Text style={{ color: '#eee', fontSize: 11, marginRight: 5 }}>{this.convertTime(item.time)}</Text>
+                </Right>
             </View>
         )
     }
     render() {
-        let { height, width } = Dimensions.get('window');
+        
         return (
-            <SafeAreaView>
-                <FlatList
-                    inverted
+            <SafeAreaView >
 
-                    style={{ padding: 10, height: height * 0.8 }}
+                <FlatList
+                   
+                    style={{ marginTop: 2,paddingBottom: 30, paddingRight: 5, paddingLeft: 5, height: this.state.tempHeight * this.state.screenMultiple }}
                     data={this.state.messageList}
                     renderItem={this.renderRow}
-                    keyExtractor={(item, index) => index.toString()} />
+                    keyExtractor={(item, index) => index.toString()}
+                    ref={listView => { this.listView = listView; }}
+                    />
 
-                <KeyboardAvoidingView behavior="padding" enabled>
+              
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 5 }}>
                         <TextInput
+                            multiline={true}
                             placeholder="Type message..."
                             style={styles.input}
                             value={this.state.textMessage}
                             onChangeText={this.handleChanges('textMessage')} />
 
-                        <TouchableOpacity onPress={this.sendMessage} style={{ paddingBottom: 10, marginLeft: 5 }}>
-                            <Button>
+                        <Button style={{ width: 45, marginLeft: 5 }} onPress={this.sendMessage}></Button>
 
-                                <Text>Home</Text>
-                            </Button>
-
-                        </TouchableOpacity>
 
                     </View>
 
-                </KeyboardAvoidingView>
             </SafeAreaView>
         )
     }
@@ -144,12 +217,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#F5FCFF',
     },
     input: {
-        padding: 8,
+        paddingLeft: 8,
         borderWidth: 1,
         borderColor: '#ccc',
-        width: '80%',
-        marginBottom: 7,
-        borderRadius: 5
+        width: '85%',
+        borderRadius: 5,
+        fontSize: 16
     },
     btnText: {
         color: 'darkblue',

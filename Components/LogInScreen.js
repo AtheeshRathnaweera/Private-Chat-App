@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, StyleSheet, Text, View, TextInput, Dimensions } from 'react-native';
+import { Alert, StyleSheet, Text, View, TextInput, Dimensions,Keyboard } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import User from '../User';
 
@@ -18,12 +18,41 @@ export default class LogInScreen extends React.Component {
     phone: '',
     name: '',
     partnerNum: '',
+    heightWhenKeyboardOpened: 0,
+    normalScreenHeight: 0
+
   }
 
   handleChange = key => val => {
     this.setState({ [key]: val })
   }
 
+  componentDidMount() {
+    this.keyboardDidShowListener = Keyboard.addListener(
+        'keyboardDidShow',
+        this._keyboardDidShow
+    );
+   
+}
+
+componentWillUnmount() {
+  this.keyboardDidShowListener.remove();
+}
+
+_keyboardDidShow = (e) => {
+
+
+  var normalHeight = Dimensions.get('window').height;
+  var shortHeight = Dimensions.get('window').height - e.endCoordinates.height;
+
+  //console.warn("Keyboard show " + this.state.keyboardOpened + " " + shortHeight + " normal: " + normalHeight + " " + keyboardHeight);
+
+  this.setState({
+      heightWhenKeyboardOpened: shortHeight + '',
+      normalScreenHeight: normalHeight + ''
+  })
+
+}
 
   submitForm = async () => {
 
@@ -36,21 +65,22 @@ export default class LogInScreen extends React.Component {
     } else {
       //Save the user
       try {
-        console.warn("Saving method started. ")
+        console.warn("Saving method started. "+this.state.heightWhenKeyboardOpened+" "+this.state.normalScreenHeight)
   
         await AsyncStorage.setItem('userPhone', this.state.phone);
         await AsyncStorage.setItem('partnerPhone', this.state.partnerNum);
         await AsyncStorage.setItem('userName', this.state.name);
         await AsyncStorage.setItem('userStatus', 'no status');
         await AsyncStorage.setItem('userImageUrl','not set');
+        await AsyncStorage.setItem('heightWhenKeyOpened',this.state.heightWhenKeyboardOpened);
+        await AsyncStorage.setItem('normalScreenHeight',this.state.normalScreenHeight);
   
         User.phone = this.state.phone;
         User.name = this.state.name;
         User.status = 'no status';
         User.imageUrl = 'not set';
-      
   
-        firebase.database().ref('users/' + User.phone).set({ User }, function (error) {
+        firebase.database().ref('users/'+User.phone).set({ User }, function (error) {
           if (error) {
             // The write failed...
             Alert.alert("Unexpected error", "This problem may occur because of the failure of your connection. Please check and try again.");
@@ -61,7 +91,7 @@ export default class LogInScreen extends React.Component {
   
       } catch (e) {
         // saving error
-        console.warn(e.message);
+        console.warn("firebase exception: "+e.message);
       }
 
 

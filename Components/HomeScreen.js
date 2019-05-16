@@ -206,9 +206,10 @@ export default class HomeScreen extends React.Component {
 
                     <TouchableOpacity
                        // onPress={() => this.props.navigation.navigate('chatScreen', item)}
+                       //source={{ uri: this.state.partnerImgUrl}}
                         style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, marginTop: 10 }]}>
 
-                        <Thumbnail large source={{ uri: this.state.partnerImgUrl}} style={styles.profileImg} />
+                        <Thumbnail large  style={styles.profileImg} />
 
                     </TouchableOpacity>
 
