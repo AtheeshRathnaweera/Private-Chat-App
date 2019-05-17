@@ -1,0 +1,28 @@
+  <FlatList
+                   
+                    style={{ marginTop: 2,paddingBottom: 30, paddingRight: 5, paddingLeft: 5, 
+                        height: this.state.tempHeight * this.state.screenMultiple }}
+                    data={this.state.messageList}
+                    renderItem={this.renderRow}
+                    keyExtractor={(item, index) => index.toString()}
+                    ref={listView => { this.listView = listView; }}
+
+                    />
+
+              
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 5, justifyContent: 'center'}}>
+                        <TextInput
+                            multiline={true}
+                            placeholder="Type message..."
+                            style={styles.input}
+                            value={this.state.textMessage}
+                            onChangeText={this.handleChanges('textMessage')} />
+
+                        <Button style={{ width: '15%', height: '100%', marginLeft: 5, marginRight: 5 ,justifyContent: 'center', borderRadius: 30,
+                    alignContent: 'center', backgroundColor: '#1f5d64', alignItems: 'center'}} onPress={this.sendMessage}>
+                        
+                        <Icon name='md-send' style={{ color: '#fff' }} />
+                        </Button>
+
+
+                    </View>

@@ -33,6 +33,7 @@ export default class ProfileScreen extends React.Component {
 
     static navigationOptions = {
         title: 'Update Profile',
+        headerTintColor: '#fff',
         headerTitleStyle: {
             fontWeight: 'normal',
             color: '#fff',
@@ -88,7 +89,7 @@ export default class ProfileScreen extends React.Component {
             }
 
             if (changesFound) {
-                console.warn("changes found and will save");
+              // console.warn("changes found and will save");
                 changesFound = false
                 //firebase.database().ref('users').child(User.phone).update({ User });
                 firebase.database().ref().update(updates, function (error) {

@@ -6,13 +6,15 @@ import HomeScreen from './Components/HomeScreen';
 import AuthLoadingScreen from './Components/AuthLoadingScreen';
 import ChatScreen from './Components/ChatScreen';
 import ProfileScreen from './Components/ProfileScreen';
+import giftedChatTest from './Components/giftedChatTest';
 
 // Implementation of HomeScreen, OtherScreen, SignInScreen, AuthLoadingScreen
 // goes here.
 
 const AppStack = createStackNavigator({
   home: HomeScreen,
-  chatScreen: ChatScreen,
+ chatScreen: ChatScreen,
+ //chatScreen: giftedChatTest,
   userProfile: ProfileScreen
 });
 const AuthStack = createStackNavigator({ LogIn: LogInScreen });

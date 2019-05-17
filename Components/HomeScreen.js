@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 
 import User from '../User';
 
@@ -8,7 +8,7 @@ import firebase from 'firebase';
 import { YellowBox, SafeAreaView } from 'react-native';
 import _ from 'lodash';
 
-import { Container, Header, Content, Button, Icon, Title, Thumbnail,Footer, Card } from 'native-base';
+import { Container, Header, Content, Button, Icon, Title, Thumbnail, Footer, Card } from 'native-base';
 import AsyncStorage from '@react-native-community/async-storage';
 
 export default class HomeScreen extends React.Component {
@@ -62,6 +62,7 @@ export default class HomeScreen extends React.Component {
         partnerPhone: 'partner not found',
         partnerStatus: 'No status',
         partnerImgUrl: '',
+        loading: true
     }
 
 
@@ -85,7 +86,7 @@ export default class HomeScreen extends React.Component {
 
 
     async componentWillMount() {
-       
+
         YellowBox.ignoreWarnings(['Setting a timer']);
         const _console = _.clone(console);
         console.warn = message => {
@@ -103,7 +104,7 @@ export default class HomeScreen extends React.Component {
             if (foundPartPhone !== null) {
                 //console.warn("Done . Data found" + foundPartPhone);
 
-                firebase.database().ref('users/' + foundPartPhone +'/User').once('value').then(snap => {
+                firebase.database().ref('users/' + foundPartPhone + '/User').once('value').then(snap => {
 
                     if (snap.exists()) {
 
@@ -117,15 +118,16 @@ export default class HomeScreen extends React.Component {
 
 
                         this.setState({
-                           ownerPhone: userPhone,
+                            ownerPhone: userPhone,
                             partUserName: partName,
                             partnerPhone: foundPartPhone,
-                            partStatus: partStatus,
-                            partnerImgUrl: partImgUr
-                           
+                            partnerStatus: partStatus,
+                            partnerImgUrl: partImgUr,
+                            loading: false
+
                         });
 
-                        
+
                         // TODO: Handle that users do exist
 
                     } else {
@@ -144,8 +146,6 @@ export default class HomeScreen extends React.Component {
             console.warn("Error " + e.message);
             // error reading value
         }
-
-
 
         //let dbRef = firebase.database().ref('users');
         //dbRef.on('child_added', (val) => {
@@ -205,11 +205,11 @@ export default class HomeScreen extends React.Component {
 
 
                     <TouchableOpacity
-                       // onPress={() => this.props.navigation.navigate('chatScreen', item)}
-                       //source={{ uri: this.state.partnerImgUrl}}
+                        // onPress={() => this.props.navigation.navigate('chatScreen', item)}
+                        //source={{ uri: this.state.partnerImgUrl}}
                         style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, marginTop: 10 }]}>
 
-                        <Thumbnail large  style={styles.profileImg} />
+                        <Thumbnail large style={styles.profileImg} />
 
                     </TouchableOpacity>
 
@@ -220,26 +220,32 @@ export default class HomeScreen extends React.Component {
                     <Text style={{ fontSize: 13, color: '#fff' }}>{this.state.partnerStatus}</Text>
 
                     <Button rounded
-                            style={{
-                                width: width * 0.9, justifyContent: 'center', alignSelf: 'center',
-                                marginTop: 15, backgroundColor: '#B8860B', elevation: 6
-                            }}
-                            onPress={() => this.props.navigation.navigate('chatScreen', { 'personPhone': this.state.partnerPhone, 
-                                                                        'personName': this.state.partUserName,
-                                                                        'ownerPhone' : this.state.ownerPhone})}>
+                        style={{
+                            width: width * 0.9, justifyContent: 'center', alignSelf: 'center',
+                            marginTop: 15, backgroundColor: '#DAA520', elevation: 6
+                        }}
+                        onPress={() => this.props.navigation.navigate('chatScreen', {
+                            'personPhone': this.state.partnerPhone,
+                            'personName': this.state.partUserName,
+                            'ownerPhone': this.state.ownerPhone
+                        })}>
 
-                            <Text style={{ color: '#F5FCFF', fontSize: 16 }}>Open conversation</Text>
 
-                        </Button>
+
+
+                        {this.state.loading ? <ActivityIndicator size="small" color="#fff" /> : null}
+                        {this.state.loading ? null : <Text style={{ color: '#F5FCFF', fontSize: 16 }}>Open conversation</Text>}
+
+                    </Button>
 
 
                 </Content>
 
-            
+
 
             </Container>
 
-          
+
 
 
         )
