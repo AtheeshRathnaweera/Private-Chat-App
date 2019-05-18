@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator,Image } from 'react-native';
 
 import User from '../User';
 
@@ -61,7 +61,7 @@ export default class HomeScreen extends React.Component {
         partUserName: 'user not found',
         partnerPhone: 'partner not found',
         partnerStatus: 'No status',
-        partnerImgUrl: '',
+        partnerImgUrl: 'https://image.flaticon.com/icons/png/512/149/149074.png',
         loading: true
     }
 
@@ -101,6 +101,8 @@ export default class HomeScreen extends React.Component {
             const foundPartPhone = await AsyncStorage.getItem('partnerPhone');
             const userPhone = await AsyncStorage.getItem('userPhone');
 
+          
+
             if (foundPartPhone !== null) {
                 //console.warn("Done . Data found" + foundPartPhone);
 
@@ -114,8 +116,9 @@ export default class HomeScreen extends React.Component {
                         var partName = JSON.stringify(obj.name);
                         var partStatus = JSON.stringify(obj.status);
 
-                        var partImgUr = JSON.stringify(obj.imageUrl);
+                        const partImgUr = JSON.stringify(obj.imageUrl);
 
+                    
 
                         this.setState({
                             ownerPhone: userPhone,
@@ -126,6 +129,8 @@ export default class HomeScreen extends React.Component {
                             loading: false
 
                         });
+
+                    
 
 
                         // TODO: Handle that users do exist
@@ -209,7 +214,7 @@ export default class HomeScreen extends React.Component {
                         //source={{ uri: this.state.partnerImgUrl}}
                         style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, marginTop: 10 }]}>
 
-                        <Thumbnail large style={styles.profileImg} />
+                        <Image large style={styles.profileImg}  source={{uri: this.state.partnerImgUrl}}/>
 
                     </TouchableOpacity>
 

@@ -15,7 +15,9 @@
     "react-native": "0.59.8",
     "react-native-gesture-handler": "^1.2.1",
     "react-native-gifted-chat": "^0.8.2",
-    "react-navigation": "^3.9.1"
+    "react-native-image-picker": "^0.28.1",
+    "react-navigation": "^3.9.1",
+    "rn-fetch-blob": "^0.10.15"
   },
   "devDependencies": {
     "@babel/core": "7.4.4",

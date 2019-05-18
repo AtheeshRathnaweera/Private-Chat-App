@@ -93,8 +93,13 @@ export default class AuthLoadingScreen extends React.Component {
 
     startTheApp = async () => {
         
-        User.phone = await AsyncStorage.getItem('userPhone');
-        this.props.navigation.navigate(User.phone ? 'App' : 'Auth');//Go to the stack if phone number is available
+        try{
+            User.phone = await AsyncStorage.getItem('userPhone');
+            this.props.navigation.navigate(User.phone ? 'App' : 'Auth');//Go to the stack if phone number is available
+        }catch(e){
+
+        }
+     
     };
 
     // Render any loading content that you like here

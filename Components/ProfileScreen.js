@@ -1,17 +1,52 @@
 import React from 'react';
-import { View, SafeAreaView, StyleSheet, TextInput, Alert, TouchableOpacity, Dimensions } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, TextInput, Alert, TouchableOpacity, Dimensions, Image } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import User from '../User';
 
 import { Container, Button, Content, Thumbnail, Input, Item, Form, Label, Text } from 'native-base';
 import firebase from 'firebase';
 
+import ImagePicker from 'react-native-image-picker';
+
+import RNFetchBlob from 'rn-fetch-blob'
+
+const Blob = RNFetchBlob.polyfill.Blob
+const fs = RNFetchBlob.fs
+window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest
+window.Blob = Blob
 
 export default class ProfileScreen extends React.Component {
 
+    constructor(props) {
+        super(props);
+
+        var options = {
+            title: 'Select Avatar',
+            customButtons: [{ name: 'fb', title: 'Choose Photo from Facebook' }],
+            storageOptions: {
+                skipBackup: true,
+                path: 'images',
+            },
+        };
+
+    }
+
+    state = {
+        name: '',
+        status: '',
+        userImageUrl: 'https://avatars0.githubusercontent.com/u/12028011?v=3&s=200',
+        showSaveText: true,
+        dataSaved: false,
+        saveButtonColor: '#DAA520',
+        dataSaving: false
+
+    }
+
+
+
+
     async componentDidMount() {
 
-  
         const uName = await AsyncStorage.getItem('userName');
         const uStatus = await AsyncStorage.getItem('userStatus');
         const uImUrl = await AsyncStorage.getItem('userImageUrl');
@@ -28,8 +63,9 @@ export default class ProfileScreen extends React.Component {
 
         });
 
-        //console.warn("data" + User.name + " " + User.status + " " + User.imageUrl);
     }
+
+
 
     static navigationOptions = {
         title: 'Update Profile',
@@ -46,14 +82,6 @@ export default class ProfileScreen extends React.Component {
 
     }
 
-    state = {
-        name: '',
-        status: '',
-        userImageUrl: '',
-        dataSaved: false,
-        saveButtonColor: '#DAA520'
-
-    }
 
     handleChange = key => val => {
         this.setState({ [key]: val })
@@ -63,6 +91,10 @@ export default class ProfileScreen extends React.Component {
         if (this.state.name.length < 3) {
             Alert.alert('Error', 'Please enter valid name.');
         } else {
+            this.setState({
+                showSaveText: false,
+                dataSaving: true
+            });
 
             var updates = {};
             var changesFound = false
@@ -83,21 +115,26 @@ export default class ProfileScreen extends React.Component {
                 changesFound = true
             }
             if (this.state.userImageUrl !== User.imageUrl) {
+               // console.warn("Profile pic have changed");
                 await AsyncStorage.setItem('userImageUrl', this.state.userImageUrl);
                 updates['users/' + User.phone + '/User/imageUrl'] = this.state.userImageUrl;
                 changesFound = true
             }
 
             if (changesFound) {
-              // console.warn("changes found and will save");
+                // console.warn("changes found and will save");
                 changesFound = false
                 //firebase.database().ref('users').child(User.phone).update({ User });
                 firebase.database().ref().update(updates, function (error) {
                     if (error) {
                         Alert.alert("Unexpected error", "This problem may occur because of the failure of your connection. Please check and try again.");
                     } else {
-                        this.setState({ dataSaved: true })
-                        this.setState({ saveButtonColor: '#3F602B' })
+                        this.setState({
+                            dataSaving: false,
+                            dataSaved: true,
+                            saveButtonColor: '#3F602B'
+                        })
+
                     }
                 }.bind(this));
             } else {
@@ -107,9 +144,91 @@ export default class ProfileScreen extends React.Component {
 
     }
 
-    changePicture() {
-        console.warn("Change picture method called.");
+    uploadImage(uri, mime = 'application/privateChatApp') {
+
+        this.setState({
+            showSaveText: false,
+            dataSaving: true
+        })
+
+        return new Promise((resolve, reject) => {
+
+            const uploadUri = Platform.OS === 'ios' ? uri.replace('file://', '') : uri
+            let uploadBlob = null
+
+
+            const imageRef = firebase.storage().ref('images').child('user' + User.phone)
+
+
+            fs.readFile(uploadUri, 'base64')
+                .then((data) => {
+                 
+                    return Blob.build(data, { type: `${mime};BASE64` })
+                })
+                .then((blob) => {
+                  
+                    uploadBlob = blob
+                    return imageRef.put(blob, { contentType: mime })
+                })
+                .then(() => {
+                    uploadBlob.close()
+                   
+
+                    return imageRef.getDownloadURL()
+                })
+                .then((url) => {
+                    resolve(url)
+                })
+                .catch((error) => {
+                    console.warn("Error occured " + error);
+                    reject(error)
+                })
+        })
     }
+
+
+
+    changePicture = () => {
+        // console.warn("Change picture method called.");
+
+        ImagePicker.showImagePicker(this.options, (response) => {
+            //console.warn('Response = ', response);
+
+            if (response.didCancel) {
+                console.warn('User cancelled image picker');
+            } else if (response.error) {
+                console.warn('ImagePicker Error: ', response.error);
+            } else if (response.customButton) {
+                console.warn('User tapped custom button: ', response.customButton);
+            } else {
+                // const uriSource = { uri: response.uri };
+
+
+                // You can also display the image using data:
+                const source = { uri: 'data:image/jpeg;base64,' + response.data };
+                //console.warn("Received image uri : "+ source);
+                //  this.uploadThePicture(uriSource)
+
+                // this.setState({
+                //    selectedImageUrl: source,
+                //});
+
+                this.uploadImage(response.uri)
+                    .then(url => {
+                        alert('uploaded ' + url); 
+                        this.setState({
+                            userImageUrl: url,
+                            dataSaving: false,
+                            showSaveText: true
+                        })
+                    })
+                    .catch(error => console.warn(error))
+
+            }
+        });
+
+    }
+
 
 
     logOut = async () => {
@@ -138,7 +257,7 @@ export default class ProfileScreen extends React.Component {
                             //onPress={() => this.props.navigation.navigate('chatScreen', item)}
                             style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1 }]}>
 
-                            <Thumbnail large source={require('../images/man.png')} style={styles.profileImg} />
+                            <Image large source={{uri: this.state.userImageUrl}}  style={styles.profileImg} />
 
                         </TouchableOpacity>
 
@@ -169,12 +288,16 @@ export default class ProfileScreen extends React.Component {
                         <Button rounded
                             style={{
 
-                                width: width * 0.9, justifyContent: 'center', alignSelf: 'center',
+                                width: width * 0.9, justifyContent: 'center', alignSelf: 'center', alignItems: 'center',
                                 marginTop: 8, backgroundColor: this.state.saveButtonColor, elevation: 5
                             }}
                             onPress={this.state.dataSaved ? console.log("Once saved") : this.saveData}>
 
-                            <Text style={{ color: '#F5FCFF', fontSize: 14 }}>{this.state.dataSaved ? "Saved successfully " : "Save changes"}</Text>
+                            <Text style={{ color: '#F5FCFF', fontSize: 14 }}>{this.state.showSaveText ? " Save changes" : null}</Text>
+                            {this.state.dataSaving ? <ActivityIndicator size="small" color="#fff" /> : null}
+                            <Text style={{ color: '#F5FCFF', fontSize: 14 }}>{this.state.dataSaved ? "Saved successfully" : null}</Text>
+
+
 
                         </Button>
 

@@ -65,7 +65,7 @@ _keyboardDidShow = (e) => {
     } else {
       //Save the user
       try {
-        console.warn("Saving method started. "+this.state.heightWhenKeyboardOpened+" "+this.state.normalScreenHeight)
+       // console.warn("Saving method started. "+this.state.heightWhenKeyboardOpened+" "+this.state.normalScreenHeight)
   
         await AsyncStorage.setItem('userPhone', this.state.phone);
         await AsyncStorage.setItem('partnerPhone', this.state.partnerNum);
