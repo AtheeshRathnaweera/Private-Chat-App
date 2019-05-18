@@ -71,11 +71,11 @@ export default class HomeScreen extends React.Component {
         //Check if any users exist
         firebase.database().ref('users').limitToFirst(1).once(partnersPhoneNumber, snapshot => {
             if (snapshot.exists()) {
-                console.warn("exists!");
+               // console.warn("exists!");
                 // TODO: Handle that users do exist
                 return true;
             } else {
-                console.warn("Not exists!");
+               // console.warn("Not exists!");
                 return false;
             }
 
@@ -113,19 +113,23 @@ export default class HomeScreen extends React.Component {
                         let stringifyObject = JSON.stringify(snap)
                         let obj = JSON.parse(stringifyObject);
                         obj.key = snap.key
-                        var partName = JSON.stringify(obj.name);
-                        var partStatus = JSON.stringify(obj.status);
+                        const partName = JSON.stringify(obj.name);
+                        const partStatus = JSON.stringify(obj.status);
 
                         const partImgUr = JSON.stringify(obj.imageUrl);
 
                     
+                        const formattedName = partName.replace(/^"(.*)"$/, '$1');
+                        const formattedUri = partImgUr.replace(/^"(.*)"$/, '$1');
+
+                        //console.warn("This is the uri:   "+formattedUri);
 
                         this.setState({
                             ownerPhone: userPhone,
-                            partUserName: partName,
+                            partUserName: formattedName,
                             partnerPhone: foundPartPhone,
                             partnerStatus: partStatus,
-                            partnerImgUrl: partImgUr,
+                            partnerImgUrl: formattedUri,
                             loading: false
 
                         });
@@ -214,7 +218,7 @@ export default class HomeScreen extends React.Component {
                         //source={{ uri: this.state.partnerImgUrl}}
                         style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, marginTop: 10 }]}>
 
-                        <Image large style={styles.profileImg}  source={{uri: this.state.partnerImgUrl}}/>
+                        <Image large style={styles.profileImg}  source={{uri : this.state.partnerImgUrl }}/>
 
                     </TouchableOpacity>
 

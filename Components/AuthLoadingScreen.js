@@ -14,13 +14,20 @@ import AsyncStorage from '@react-native-community/async-storage';
 import firebase from 'firebase';
 import NetInfo from "@react-native-community/netinfo";
 
+
+
+
 export default class AuthLoadingScreen extends React.Component {
     constructor(props) {
         super(props);
         this.testNetCheck();
     }
 
+   
+
+
     componentWillMount() {
+      
 
         var firebaseConfig = {
             apiKey: "AIzaSyA5SEkctVYo1KU0jlYU_OZ0UFII8t0-vPA",

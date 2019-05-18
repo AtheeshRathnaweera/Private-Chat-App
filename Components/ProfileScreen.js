@@ -138,7 +138,7 @@ export default class ProfileScreen extends React.Component {
                     }
                 }.bind(this));
             } else {
-                console.warn("nothing to save");
+               // console.warn("nothing to save");
             }
         }
 
