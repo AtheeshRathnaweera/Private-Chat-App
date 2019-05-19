@@ -39,7 +39,11 @@ export default class AuthLoadingScreen extends React.Component {
             appId: "1:451878681021:web:7cac106060a18de5"
         };
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        
 
     }
 
@@ -100,12 +104,10 @@ export default class AuthLoadingScreen extends React.Component {
 
     startTheApp = async () => {
         
-        try{
+      
             User.phone = await AsyncStorage.getItem('userPhone');
             this.props.navigation.navigate(User.phone ? 'App' : 'Auth');//Go to the stack if phone number is available
-        }catch(e){
-
-        }
+     
      
     };
 

@@ -215,7 +215,7 @@ export default class ProfileScreen extends React.Component {
 
                 this.uploadImage(response.uri)
                     .then(url => {
-                        alert('uploaded ' + url); 
+                        //alert('uploaded ' + url); 
                         this.setState({
                             userImageUrl: url,
                             dataSaving: false,

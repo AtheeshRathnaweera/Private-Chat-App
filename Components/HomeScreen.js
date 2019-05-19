@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator,Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator,Image,ImageBackground } from 'react-native';
 
 import User from '../User';
 
@@ -8,52 +8,52 @@ import firebase from 'firebase';
 import { YellowBox, SafeAreaView } from 'react-native';
 import _ from 'lodash';
 
-import { Container, Header, Content, Button, Icon, Title, Thumbnail, Footer, Card } from 'native-base';
+import { Container, Header, Content, Button, Right, Icon, Thumbnail, Footer, Card } from 'native-base';
 import AsyncStorage from '@react-native-community/async-storage';
 
 export default class HomeScreen extends React.Component {
 
-    //  static navigationOptions = {
-    //    header: null
-    //   }
-    static navigationOptions = ({ navigation }) => {
+      static navigationOptions = {
+      header: null
+  }
+    //static navigationOptions = ({ navigation }) => {
 
-        let c = new Date();
-        let result = '';
-        let time = c.getHours();
+   //     let c = new Date();
+    //    let result = '';
+    //    let time = c.getHours();
 
-        if (time < 4) {
-            result = " Devils are awake now ! "
-        } else if (time < 11) {
-            result = " Good Morning ! "
-        } else if (time < 14) {
-            result = " It's so hot outside!"
-        } else if (time < 19) {
-            result = " Good Evening !"
-        } else if (time < 23) {
-            result = " Time to chill with moon !"
-        } else if (time < 24) {
-            result = " Time to sleep !"
-        }
+    //    if (time < 4) {
+    //        result = " Devils are awake now ! "
+    //    } else if (time < 11) {
+   //         result = " Good Morning ! "
+   //     } else if (time < 14) {
+    //        result = " It's so hot outside!"
+    //    } else if (time < 19) {
+    //        result = " Good Evening !"
+    //    } else if (time < 23) {
+    //        result = " Time to chill with moon !"
+    //    } else if (time < 24) {
+   //         result = " Time to sleep !"
+    //    }
 
-        return {
-            title: result,
-            headerTitleStyle: {
-                fontWeight: 'normal',
-                color: '#fff',
-            },
+    //    return {
+    //        title: result,
+    //        headerTitleStyle: {
+     //           fontWeight: 'normal',
+    //            color: '#fff',
+    //        },
 
-            headerStyle: {
-                backgroundColor: '#1f5d64',
-                color: '#fff'
-            },
+     //       headerStyle: {
+     //           backgroundColor: 'rgba(52, 52, 52, 0.8)'//#1f5d64
+               
+     //       },
 
-            headerRight:
-                <Button transparent onPress={() => navigation.navigate('userProfile')} style={{ alignSelf: 'center' }}>
-                    <Icon name='person' style={{ color: '#fff' }} />
-                </Button>
-        }
-    }
+    //        headerRight:
+   //             <Button transparent onPress={() => navigation.navigate('userProfile')} style={{ alignSelf: 'center' }}>
+   //                 <Icon name='person' style={{ color: '#fff' }} />
+  //              </Button>
+  //      }
+  //  }
 
     state = {
         users: [],
@@ -208,7 +208,19 @@ export default class HomeScreen extends React.Component {
         const uri = "https://facebook.github.io/react-native/docs/assets/favicon.png";
         return (
 
-            <Container style={{ flex: 1, backgroundColor: '#1f5d64', alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
+            <ImageBackground source={require('../images/backThree.jpg')} style={{  flex:1, width:null, height: null }}>
+
+            <Container style={{ flex: 1, backgroundColor: 'transparent', alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
+
+            <Header transparent>
+       
+          <Right>
+          <Button transparent onPress={() => navigation.navigate('userProfile')} style={{ alignSelf: 'center' }}>
+             <Icon name='person' style={{ color: '#fff' }} />
+              </Button>
+          </Right>
+        </Header>
+
 
                 <Content contentContainerStyle={{ alignItems: 'center', padding: 12 }}  >
 
@@ -216,7 +228,7 @@ export default class HomeScreen extends React.Component {
                     <TouchableOpacity
                         // onPress={() => this.props.navigation.navigate('chatScreen', item)}
                         //source={{ uri: this.state.partnerImgUrl}}
-                        style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, marginTop: 10 }]}>
+                        style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, marginTop: 10, elevation:10 }]}>
 
                         <Image large style={styles.profileImg}  source={{uri : this.state.partnerImgUrl }}/>
 
@@ -231,7 +243,7 @@ export default class HomeScreen extends React.Component {
                     <Button rounded
                         style={{
                             width: width * 0.9, justifyContent: 'center', alignSelf: 'center',
-                            marginTop: 15, backgroundColor: '#DAA520', elevation: 6
+                            marginTop: 15, backgroundColor: '#DAA520', elevation: 10
                         }}
                         onPress={() => this.props.navigation.navigate('chatScreen', {
                             'personPhone': this.state.partnerPhone,
@@ -250,9 +262,13 @@ export default class HomeScreen extends React.Component {
 
                 </Content>
 
+               
+
 
 
             </Container>
+
+            </ImageBackground>
 
 
 

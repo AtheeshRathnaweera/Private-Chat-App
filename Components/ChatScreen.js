@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, SafeAreaView, Text, TextInput, StyleSheet, Keyboard, FlatList, ActivityIndicator,ImageBackground} from 'react-native';
+import { View, SafeAreaView, Text, TextInput, StyleSheet, Keyboard, FlatList, ActivityIndicator, ImageBackground } from 'react-native';
 
 import User from '../User';
 
@@ -8,7 +8,6 @@ import { Button, Icon, Right, Toast, Fab } from 'native-base'
 
 import AsyncStorage from '@react-native-community/async-storage';
 
-import { GiftedChat } from "react-native-gifted-chat";
 
 
 
@@ -19,13 +18,16 @@ export default class ChatScreen extends React.Component {
             headerTintColor: '#fff',
             headerStyle: {
                 backgroundColor: '#1f5d64',
+                
             },
             headerTitleStyle: {
                 fontWeight: 'normal',
             },
             title: navigation.getParam('personName', null),
-    
            
+
+
+
 
         }
     }
@@ -45,8 +47,9 @@ export default class ChatScreen extends React.Component {
             tempHeight: 600,
             screenMultiple: 0.79,
             newMessage: false,
-            loading: true
-    
+            loading: true,
+         
+
         }
         this.getHeightWhenKeyOpened()
 
@@ -70,9 +73,9 @@ export default class ChatScreen extends React.Component {
 
     componentDidMount() {
 
-    
 
-       
+
+
 
         this.keyboardDidShowListener = Keyboard.addListener(
             'keyboardDidShow',
@@ -83,13 +86,13 @@ export default class ChatScreen extends React.Component {
             this._keyboardDidHide,
         );
 
-       
+
 
 
     }
 
     componentWillMount() {
-       
+
 
         firebase.database().ref('messages').child(this.state.person.ownerPhone).child(this.state.person.phone)
             .on('child_added', (value) => {
@@ -102,16 +105,17 @@ export default class ChatScreen extends React.Component {
                 })
 
                 this.setState({
-                    loading : false
+                    loading: false
                 })
 
-                try{
+                try {
                     this.listView.scrollToEnd()
-                }catch(e){
-        
-                }
-               
                 
+                } catch (e) {
+
+                }
+
+
             })
 
     }
@@ -124,26 +128,16 @@ export default class ChatScreen extends React.Component {
         let d = new Date(item);
         let c = new Date();
         let result = (d.getHours() < 10 ? '0' : '') + d.getHours() + ':';
-        result += (d.getMinutes() < 10 ? '0' : '') + d.getMinutes() + " " + (d.getHours() < 12 ? 'AM' : 'PM');
-
-       // if (this.state.tempPrevData != d.getDay()) {
-        //   this.setState({
-       //        dateAdded: false,
-       //        tempPrevData: d.getDay()
-       //    })
-
-      //  }
-    
-     
+        result += (d.getMinutes() < 10 ? '0' : '') + d.getMinutes() + " " + (d.getHours() < 12 ? 'AM' : 'PM')
 
         return result;
-        
+
     }
 
     getDateFromItem = (item) => {
 
         let d = new Date(item);
-        let result = d.getDate() +" "+ d.getMonth()+1 + " "+d.getFullYear();
+        let result = d.getDate() + " " + d.getMonth() + 1 + " " + d.getFullYear();
         this.setState({
             dateAdded: true
         })
@@ -154,11 +148,8 @@ export default class ChatScreen extends React.Component {
 
     sendMessage = async () => {
 
-      
-
-
-
         if (this.state.textMessage.length > 0) {
+
             let msgId = firebase.database().ref('messages').child(User.phone).child(this.state.person.phone).push().key;
             let updates = {};
             let message = {
@@ -173,19 +164,22 @@ export default class ChatScreen extends React.Component {
                 if (error) {
                     Alert.alert("Message not sent", "Unexpected error occured.");
                 } else {
-                
+
                     this.listView.scrollToEnd();
 
                 }
             }.bind(this)
             );
 
-            this.setState({ textMessage: '' });
+            this.setState({
+                textMessage: ''
+              
+            });
 
 
         } else {
             this.listView.scrollToEnd();
-            
+
         }
 
 
@@ -206,14 +200,14 @@ export default class ChatScreen extends React.Component {
 
         this.setState({
             tempHeight: this.state.heightWhenKeyOpened,
-            screenMultiple: 1
+            screenMultiple: 0.9
         })
 
 
     }
 
     _keyboardDidHide = () => {
-       // this.listView.scrollToEnd();
+        // this.listView.scrollToEnd();
 
         this.setState({
             tempHeight: this.state.normalScreenHeight,
@@ -222,15 +216,15 @@ export default class ChatScreen extends React.Component {
         //console.warn("Keyboard hide" + this.state.keyboardOpened);
     }
 
-    goToTheBottom=()=>{
-        this.state.newMessage ?  this.listView.scrollToEnd():null ;
+    goToTheBottom = () => {
+        this.state.newMessage ? this.listView.scrollToEnd() : null;
     }
 
     renderRow = ({ item }) => {
         return (
 
-         
-               
+
+
 
             <View style={{
                 flexDirection: 'row',
@@ -244,7 +238,7 @@ export default class ChatScreen extends React.Component {
                 elevation: 5
             }}>
 
-        
+
 
                 <Text multiline={true} style={{ color: item.from === User.phone ? '#fff' : '#505050', padding: 7, fontSize: 15, width: '74%' }}>
                     {item.message}
@@ -263,57 +257,64 @@ export default class ChatScreen extends React.Component {
     render() {
 
         return (
-           <SafeAreaView style={{flex: 1, backgroundColor: 'transparent',flexDirection:'column'}}>
-          
-          <ImageBackground source={require('../images/wtsappChat.jpg')} style={{width: '100%', height: '100%'}}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent', flexDirection: 'column' }}>
 
-  
-             {this.state.loading? <ActivityIndicator size="large" color="#1f5d64" style={{marginTop:10}}/>: null}
+                <ImageBackground source={require('../images/backOne.jpg')} style={{ width: '100%', height: '100%' }}>
 
 
-            <FlatList
-                   
-            style={{ marginTop: 2,paddingRight: 5, paddingLeft: 5, 
-                height: this.state.tempHeight * this.state.screenMultiple, backgroundColor: 'transparent' }}
-            data={this.state.messageList}
-            renderItem={this.renderRow}
-            keyExtractor={(item, index) => index.toString()}
-            ref={listView => { this.listView = listView; }}
-            showsVerticalScrollIndicator = {false}
-          
-
-            />
-
-                      
-      
-            <View style={{ flexDirection: 'row',paddingBottom:5, alignItems: 'center', 
-            marginHorizontal: 5, justifyContent: 'center', backgroundColor: 'transparent'}}>
-             
-               
-                <TextInput
-                    multiline={true}
-                    placeholder="Type message..."
-                    style={styles.input}
-                    value={this.state.textMessage}
-                    onChangeText={this.handleChanges('textMessage')} 
-                />
-
-                <Button style={{ width: '15%', height: '95%', marginLeft: 5, marginRight: 5 ,justifyContent: 'center', borderRadius: 30,
-            alignContent: 'center', backgroundColor: '#1f5d64', alignItems: 'center',elevation:5}} onPress={this.sendMessage}>
-                
-                <Icon name='md-send' style={{ color: '#fff' }} />
-                </Button>
+                    {this.state.loading ? <ActivityIndicator size="large" color="#1f5d64" style={{ marginTop: 10 }} /> : null}
 
 
-         
+                    <FlatList
 
-            </View>
+                        style={{
+                            marginTop: 2, paddingRight: 5, paddingLeft: 5,
+                            height: this.state.tempHeight * this.state.screenMultiple, backgroundColor: 'transparent'
+                        }}
+                        data={this.state.messageList}
+                        renderItem={this.renderRow}
+                        keyExtractor={(item, index) => index.toString()}
+                        ref={listView => { this.listView = listView; }}
+                        showsVerticalScrollIndicator={false}
 
-            </ImageBackground>
+
+                    />
+
+
+
+                    <View style={{
+                        flexDirection: 'row', paddingBottom: 5, alignItems: 'center',
+                        marginHorizontal: 5, justifyContent: 'center', backgroundColor: 'transparent'
+                    }}>
+
+
+                        <TextInput
+                            multiline={true}
+                            placeholder="Type message..."
+                            style={styles.input}
+                            value={this.state.textMessage}
+                            onChangeText={this.handleChanges('textMessage')}
+                        
+                        />
+
+                        <Button style={{
+                            width: '15%', height: '95%', marginLeft: 5, marginRight: 5, justifyContent: 'center', borderRadius: 30,
+                            alignContent: 'center', backgroundColor: '#1f5d64', alignItems: 'center', elevation: 5
+                        }} onPress={this.sendMessage}>
+
+                            <Icon name='md-send' style={{ color: '#fff' }} />
+                        </Button>
+
+
+
+
+                    </View>
+
+                </ImageBackground>
             </SafeAreaView>
 
 
-        
+
         )
     }
 }
