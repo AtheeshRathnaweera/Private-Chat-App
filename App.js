@@ -8,6 +8,9 @@ import ChatScreen from './Components/ChatScreen';
 import ProfileScreen from './Components/ProfileScreen';
 
 
+import ViewGalleryScreen from './Components/ViewGalleryScreen';
+
+
 // Implementation of HomeScreen, OtherScreen, SignInScreen, AuthLoadingScreen
 // goes here.
 
@@ -15,7 +18,8 @@ const AppStack = createStackNavigator({
   home: HomeScreen,
  chatScreen: ChatScreen,
  //chatScreen: giftedChatTest,
-  userProfile: ProfileScreen
+  userProfile: ProfileScreen,
+  viewGallery: ViewGalleryScreen
 });
 const AuthStack = createStackNavigator({ LogIn: LogInScreen });
 

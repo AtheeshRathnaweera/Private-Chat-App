@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Platform, StyleSheet, TextInput, Alert, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, TextInput, Alert, TouchableOpacity, Dimensions, Image, ImageBackground } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import User from '../User';
 
@@ -68,17 +68,19 @@ export default class ProfileScreen extends React.Component {
 
 
     static navigationOptions = {
-        title: 'Update Profile',
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-            fontWeight: 'normal',
-            color: '#fff',
-        },
 
-        headerStyle: {
-            backgroundColor: '#1f5d64',
-            color: '#fff'
-        },
+        header : null
+        //title: 'Update Profile',
+       // headerTintColor: '#fff',
+        //headerTitleStyle: {
+       //     fontWeight: 'normal',
+       //     color: '#fff',
+       // },
+
+       // headerStyle: {
+       //     backgroundColor: '#1f5d64',
+      //      color: '#fff'
+      //  },
 
     }
 
@@ -241,8 +243,12 @@ export default class ProfileScreen extends React.Component {
         let { height, width } = Dimensions.get('window');
 
         return (
+
+            <ImageBackground source={require('../images/backThree.jpg')} style={{ flex: 1, width: null, height: null }}>
+
+     
             <Container style={{
-                flex: 1, backgroundColor: '#1f5d64', alignItems: 'center',
+                flex: 1, backgroundColor: 'transparent', alignItems: 'center',
                 flexDirection: 'row', justifyContent: 'center'
             }}>
 
@@ -319,6 +325,10 @@ export default class ProfileScreen extends React.Component {
 
             </Container>
 
+            </ImageBackground>
+
+       
+
         )
     }
 
@@ -333,7 +343,7 @@ const styles = StyleSheet.create({
     },
     input: {
         padding: 8,
-        borderWidth: 1,
+        borderWidth: 2,
         borderColor: '#ccc',
         width: '100%',
         marginBottom: 7,

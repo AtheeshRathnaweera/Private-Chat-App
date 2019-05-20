@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator,Image,ImageBackground } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator, Image, ImageBackground } from 'react-native';
 
 import User from '../User';
 
@@ -13,47 +13,47 @@ import AsyncStorage from '@react-native-community/async-storage';
 
 export default class HomeScreen extends React.Component {
 
-      static navigationOptions = {
-      header: null
-  }
+    static navigationOptions = {
+        header: null
+    }
     //static navigationOptions = ({ navigation }) => {
 
-   //     let c = new Date();
+    //     let c = new Date();
     //    let result = '';
     //    let time = c.getHours();
 
     //    if (time < 4) {
     //        result = " Devils are awake now ! "
     //    } else if (time < 11) {
-   //         result = " Good Morning ! "
-   //     } else if (time < 14) {
+    //         result = " Good Morning ! "
+    //     } else if (time < 14) {
     //        result = " It's so hot outside!"
     //    } else if (time < 19) {
     //        result = " Good Evening !"
     //    } else if (time < 23) {
     //        result = " Time to chill with moon !"
     //    } else if (time < 24) {
-   //         result = " Time to sleep !"
+    //         result = " Time to sleep !"
     //    }
 
     //    return {
     //        title: result,
     //        headerTitleStyle: {
-     //           fontWeight: 'normal',
+    //           fontWeight: 'normal',
     //            color: '#fff',
     //        },
 
-     //       headerStyle: {
-     //           backgroundColor: 'rgba(52, 52, 52, 0.8)'//#1f5d64
-               
-     //       },
+    //       headerStyle: {
+    //           backgroundColor: 'rgba(52, 52, 52, 0.8)'//#1f5d64
+
+    //       },
 
     //        headerRight:
-   //             <Button transparent onPress={() => navigation.navigate('userProfile')} style={{ alignSelf: 'center' }}>
-   //                 <Icon name='person' style={{ color: '#fff' }} />
-  //              </Button>
-  //      }
-  //  }
+    //             <Button transparent onPress={() => navigation.navigate('userProfile')} style={{ alignSelf: 'center' }}>
+    //                 <Icon name='person' style={{ color: '#fff' }} />
+    //              </Button>
+    //      }
+    //  }
 
     state = {
         users: [],
@@ -71,11 +71,11 @@ export default class HomeScreen extends React.Component {
         //Check if any users exist
         firebase.database().ref('users').limitToFirst(1).once(partnersPhoneNumber, snapshot => {
             if (snapshot.exists()) {
-               // console.warn("exists!");
+                // console.warn("exists!");
                 // TODO: Handle that users do exist
                 return true;
             } else {
-               // console.warn("Not exists!");
+                // console.warn("Not exists!");
                 return false;
             }
 
@@ -101,7 +101,7 @@ export default class HomeScreen extends React.Component {
             const foundPartPhone = await AsyncStorage.getItem('partnerPhone');
             const userPhone = await AsyncStorage.getItem('userPhone');
 
-          
+
 
             if (foundPartPhone !== null) {
                 //console.warn("Done . Data found" + foundPartPhone);
@@ -118,7 +118,7 @@ export default class HomeScreen extends React.Component {
 
                         const partImgUr = JSON.stringify(obj.imageUrl);
 
-                    
+
                         const formattedName = partName.replace(/^"(.*)"$/, '$1');
                         const formattedUri = partImgUr.replace(/^"(.*)"$/, '$1');
 
@@ -134,7 +134,7 @@ export default class HomeScreen extends React.Component {
 
                         });
 
-                    
+
 
 
                         // TODO: Handle that users do exist
@@ -208,65 +208,120 @@ export default class HomeScreen extends React.Component {
         const uri = "https://facebook.github.io/react-native/docs/assets/favicon.png";
         return (
 
-            <ImageBackground source={require('../images/backThree.jpg')} style={{  flex:1, width:null, height: null }}>
+            <ImageBackground source={require('../images/backThree.jpg')} style={{ flex: 1, width: null, height: null }}>
 
-            <Container style={{ flex: 1, backgroundColor: 'transparent', alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
+                <View style={{ flex: 1, backgroundColor: 'transparent', alignItems: 'center', flexDirection: 'column', justifyContent: 'center' }}>
 
-            <Header transparent>
-       
-          <Right>
-          <Button transparent onPress={() => navigation.navigate('userProfile')} style={{ alignSelf: 'center' }}>
-             <Icon name='person' style={{ color: '#fff' }} />
-              </Button>
-          </Right>
-        </Header>
+                    <Header transparent>
 
-
-                <Content contentContainerStyle={{ alignItems: 'center', padding: 12 }}  >
+                        <Right>
+                            <Button transparent onPress={() => navigation.navigate('userProfile')} style={{ alignSelf: 'center' }}>
+                                <Icon name='person' style={{ color: '#fff' }} />
+                            </Button>
+                        </Right>
+                    </Header>
 
 
-                    <TouchableOpacity
-                        // onPress={() => this.props.navigation.navigate('chatScreen', item)}
-                        //source={{ uri: this.state.partnerImgUrl}}
-                        style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, marginTop: 10, elevation:10 }]}>
+<View style={{  flexDirection: 'row',marginRight:45, marginLeft: 45}} >
 
-                        <Image large style={styles.profileImg}  source={{uri : this.state.partnerImgUrl }}/>
-
-                    </TouchableOpacity>
-
-                    <Text style={{ fontSize: 22, color: '#fff', marginTop: 10, fontStyle: 'italic' }}>{this.state.partUserName}</Text>
-
-                    <Text style={{ fontSize: 13, color: '#fff' }}>{this.state.partnerPhone}</Text>
-
-                    <Text style={{ fontSize: 13, color: '#fff' }}>{this.state.partnerStatus}</Text>
-
-                    <Button rounded
-                        style={{
-                            width: width * 0.9, justifyContent: 'center', alignSelf: 'center',
-                            marginTop: 15, backgroundColor: '#DAA520', elevation: 10
-                        }}
-                        onPress={() => this.props.navigation.navigate('chatScreen', {
-                            'personPhone': this.state.partnerPhone,
-                            'personName': this.state.partUserName,
-                            'ownerPhone': this.state.ownerPhone
-                        })}>
+                    <Content contentContainerStyle={{ alignItems: 'center'}}  >
 
 
+                        <TouchableOpacity
+                            // onPress={() => this.props.navigation.navigate('chatScreen', item)}
+                            //source={{ uri: this.state.partnerImgUrl}}
+                            style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, elevation: 10 }]}>
+
+                            <Image large style={styles.profileImg} source={{ uri: this.state.partnerImgUrl }} />
+
+                        </TouchableOpacity>
+
+                        <Text style={{ fontSize: 18, color: '#fff', marginTop: 10, fontStyle: 'italic' }}>{this.state.partUserName}</Text>
+
+                        <Text style={{ fontSize: 12, color: '#fff' }}>{this.state.partnerPhone}</Text>
+
+                        <Text style={{ fontSize: 10, color: '#fff' }}>{this.state.partnerStatus}</Text>
+
+                    </Content>
+
+                    <Content contentContainerStyle={{ alignItems: 'center'}}  >
 
 
-                        {this.state.loading ? <ActivityIndicator size="small" color="#fff" /> : null}
-                        {this.state.loading ? null : <Text style={{ color: '#F5FCFF', fontSize: 16 }}>Open conversation</Text>}
+                        <TouchableOpacity
+                            // onPress={() => this.props.navigation.navigate('chatScreen', item)}
+                            //source={{ uri: this.state.partnerImgUrl}}
+                            style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, elevation: 10 }]}>
 
-                    </Button>
+                            <Image large style={styles.profileImg} source={{ uri: this.state.partnerImgUrl }} />
+
+                        </TouchableOpacity>
+
+                        <Text style={{ fontSize: 18, color: '#fff', marginTop: 10, fontStyle: 'italic' }}>{this.state.partUserName}</Text>
+
+                        <Text style={{ fontSize: 12, color: '#fff' }}>{this.state.partnerPhone}</Text>
+
+                        <Text style={{ fontSize: 10, color: '#fff' }}>{this.state.partnerStatus}</Text>
+
+                    </Content>
+
+                    </View> 
+
+                    <View style={{flexDirection: 'row', marginBottom: 30,position: 'absolute',bottom:0}}>
+
+                    <Button transparent   onPress={() => this.props.navigation.navigate('chatScreen', {
+                                'personPhone': this.state.partnerPhone,
+                                'personName': this.state.partUserName,
+                                'ownerPhone': this.state.ownerPhone
+                            })}
+                             style={{ alignSelf: 'center', alignItems: 'center',
+                    borderWidth: 1, borderColor: '#fff', borderRadius: 60, paddingLeft: 2,paddingTop: 24, paddingBottom: 24,paddingRight: 2, marginRight: 20 }}>
+                                
+                                {this.state.loading ? <ActivityIndicator style={{width: 40}}size="small" color="#fff" /> : null}
+                                {this.state.loading ? null : <Icon large name='md-phone-portrait' style={{ color: '#fff' }} />}
+                               
+                            </Button>
+
+                            <Button transparent onPress={() => this.props.navigation.navigate('viewGallery')} style={{ alignSelf: 'center', 
+                   alignItems: 'center', borderWidth: 1, borderColor: '#fff', borderRadius: 60, paddingTop: 25, paddingBottom: 25 , marginRight: 20}}>
+                          {this.state.loading ? <ActivityIndicator style={{width: 43}}size="small" color="#fff" /> : null}
+                          {this.state.loading ? null : <Icon large name='md-photos' style={{ color: '#fff' }} />}
+                                
+                            </Button>
+
+                            <Button transparent onPress={() => this.props.navigation.navigate('userProfile')} style={{ alignSelf: 'center', 
+                    borderWidth: 1, borderColor: '#fff', borderRadius: 60, paddingTop: 25, paddingBottom: 25 }}>
+
+{this.state.loading ? <ActivityIndicator style={{width: 43}}size="small" color="#fff" /> : null}
+                          {this.state.loading ? null : <Icon large name='md-person' style={{ color: '#fff' }} />}
+                               
+                            </Button>
+
+                            </View>
 
 
-                </Content>
-
-               
+                   
 
 
+                    
 
-            </Container>
+
+
+
+                            
+                           
+
+                    
+
+                   
+
+
+
+
+
+
+
+
+                </View>
 
             </ImageBackground>
 
@@ -295,13 +350,13 @@ const styles = StyleSheet.create({
         borderRadius: 5
     },
     profileImgContainer: {
-        height: 120,
-        width: 120,
-        borderRadius: 60,
+        height: 90,
+        width: 90,
+        borderRadius: 50,
         overflow: 'hidden'
     },
     profileImg: {
-        height: 120,
-        width: 120
+        height: 90,
+        width: 90
     },
 });

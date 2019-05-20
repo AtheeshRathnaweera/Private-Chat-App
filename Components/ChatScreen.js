@@ -13,24 +13,28 @@ import AsyncStorage from '@react-native-community/async-storage';
 
 export default class ChatScreen extends React.Component {
 
-    static navigationOptions = ({ navigation }) => {
-        return {
-            headerTintColor: '#fff',
-            headerStyle: {
-                backgroundColor: '#1f5d64',
+    static navigationOptions = {
+        header:null
+    }
+
+   // static navigationOptions = ({ navigation }) => {
+   //     return {
+    //        headerTintColor: '#fff',
+     //       headerStyle: {
+     //           backgroundColor: '#1f5d64',
                 
-            },
-            headerTitleStyle: {
-                fontWeight: 'normal',
-            },
-            title: navigation.getParam('personName', null),
+     //       },
+      //      headerTitleStyle: {
+      //          fontWeight: 'normal',
+      //      },
+      //      title: navigation.getParam('personName', null),
            
 
 
 
 
-        }
-    }
+     //   }
+    //}
 
     constructor(props) {
         super(props);
@@ -262,13 +266,13 @@ export default class ChatScreen extends React.Component {
                 <ImageBackground source={require('../images/backOne.jpg')} style={{ width: '100%', height: '100%' }}>
 
 
-                    {this.state.loading ? <ActivityIndicator size="large" color="#1f5d64" style={{ marginTop: 10 }} /> : null}
+                    {this.state.loading ? <ActivityIndicator size="large" color="#fff" style={{ marginTop: 30 }} /> : null}
 
 
                     <FlatList
 
                         style={{
-                            marginTop: 2, paddingRight: 5, paddingLeft: 5,
+                            marginTop: 37, paddingRight: 5, paddingLeft: 5,
                             height: this.state.tempHeight * this.state.screenMultiple, backgroundColor: 'transparent'
                         }}
                         data={this.state.messageList}
