@@ -26,3 +26,16 @@
 
 
                     </View>
+
+    //CODE TO COPY TP CLIPBOARD
+
+                    <Text style={{ color: '#fff', fontSize: 15 }}>Your room id</Text>
+
+                        <Text style={{
+                            color: '#fff', marginTop: 5, fontSize: 17, fontStyle: 'italic', borderWidth: 1,
+                            paddingRight: 8, paddingLeft: 8, paddingTop: 5, paddingBottom: 5, borderColor: '#fff'
+                        }}>{this.state.roomId}</Text>
+
+                        <Button style={{ backgroundColor: '#A9A9A9', alignSelf: 'center', borderRadius: 20, marginTop: 20, elevation: 10 }}
+
+                            onPress={this.writeToClipboard}><Text style={{ color: '#fff' }}>{this.state.copyButtonText}</Text></Button>

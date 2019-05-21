@@ -47,6 +47,8 @@ export default class ViewGalleryScreen extends React.Component {
                 flexDirection: 'row', justifyContent: 'center'
             }}>
 
+                <Text style={{color: '#fff'}}>This is the new room id</Text>
+
      
 
             </Container>

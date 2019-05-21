@@ -9,6 +9,7 @@ import ProfileScreen from './Components/ProfileScreen';
 
 
 import ViewGalleryScreen from './Components/ViewGalleryScreen';
+import CreateARoomID from './Components/CreateARoomID';
 
 
 // Implementation of HomeScreen, OtherScreen, SignInScreen, AuthLoadingScreen
@@ -16,12 +17,15 @@ import ViewGalleryScreen from './Components/ViewGalleryScreen';
 
 const AppStack = createStackNavigator({
   home: HomeScreen,
- chatScreen: ChatScreen,
- //chatScreen: giftedChatTest,
+  chatScreen: ChatScreen,
+  //chatScreen: giftedChatTest,
   userProfile: ProfileScreen,
   viewGallery: ViewGalleryScreen
 });
-const AuthStack = createStackNavigator({ LogIn: LogInScreen });
+const AuthStack = createStackNavigator({
+  LogIn: LogInScreen,
+  createANewRoom: CreateARoomID
+});
 
 export default createAppContainer(createSwitchNavigator(
   {
