@@ -39,7 +39,7 @@ export default class ViewGalleryScreen extends React.Component {
 
         return (
 
-            <ImageBackground source={require('../images/backThree.jpg')} style={{ flex: 1, width: null, height: null }}>
+            <ImageBackground source={require('../images/starback.jpg')} style={{ flex: 1, width: null, height: null }}>
 
      
             <Container style={{
@@ -47,7 +47,7 @@ export default class ViewGalleryScreen extends React.Component {
                 flexDirection: 'row', justifyContent: 'center'
             }}>
 
-                <Text style={{color: '#fff'}}>This is the new room id</Text>
+                <Text style={{color: '#fff'}}>This is the view gallery screen</Text>
 
      
 

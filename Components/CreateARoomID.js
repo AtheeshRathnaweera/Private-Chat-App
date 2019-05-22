@@ -1,9 +1,10 @@
 import React from 'react';
-import { Text, Keyboard, StyleSheet, TextInput, Alert, Clipboard, Dimensions, View, ImageBackground, ActivityIndicator } from 'react-native';
+import { Text, Keyboard, StyleSheet, TextInput, Alert, YellowBox, Dimensions, View, ImageBackground, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 
+import _ from 'lodash';
 
-import {  Button} from 'native-base';
+import { Button } from 'native-base';
 import firebase from 'firebase';
 
 export default class CreateARoomID extends React.Component {
@@ -67,24 +68,29 @@ export default class CreateARoomID extends React.Component {
         await AsyncStorage.setItem('partnerPhone', this.state.partnerNum);
         await AsyncStorage.setItem('userName', this.state.name);
         await AsyncStorage.setItem('userStatus', 'no status');
-        await AsyncStorage.setItem('userImageUrl', 'not set');
+        await AsyncStorage.setItem('userImageUrl', 'https://image.flaticon.com/icons/png/512/149/149074.png');
         await AsyncStorage.setItem('heightWhenKeyOpened', this.state.heightWhenKeyboardOpened);
         await AsyncStorage.setItem('normalScreenHeight', this.state.normalScreenHeight);
-
-
+        await AsyncStorage.setItem('loggedIn', 'true');
 
     }
 
     savePartnerDataInFirebase = async (roomId) => {
 
-
+        YellowBox.ignoreWarnings(['Setting a timer']);
+        const _console = _.clone(console);
+        console.warn = message => {
+            if (message.indexOf('Setting a timer') <= -1) {
+                _console.warn(message);
+            }
+        };
 
         firebase.database().ref('rooms/' + roomId + '/' + this.state.partnerNum).set({
             name: this.state.partnerName,
             phone: this.state.partnerNum,
             partnerPhone: this.state.phone,
             status: 'not set',
-            imageUrl: 'not set'
+            imageUrl: 'https://image.flaticon.com/icons/png/512/149/149074.png'
         }, function (error) {
             if (error) {
                 Alert.alert("User adding failed", "Can't add your partner to this room.Please try again by creating a new room.");
@@ -98,9 +104,13 @@ export default class CreateARoomID extends React.Component {
 
     createTheRoom = async () => {
 
-        this.setState({
-            roomCreating: true
-        })
+        YellowBox.ignoreWarnings(['Setting a timer']);
+        const _console = _.clone(console);
+        console.warn = message => {
+            if (message.indexOf('Setting a timer') <= -1) {
+                _console.warn(message);
+            }
+        };
 
         if (this.state.phone.length < 10) {
             Alert.alert("Error", "Your phone number is not valid")
@@ -112,6 +122,11 @@ export default class CreateARoomID extends React.Component {
             Alert.alert("Error", "Partner's name is not valid.")
         } else {
             //Save the user
+
+            this.setState({
+                roomCreating: true
+            })
+
             try {
                 // console.warn("Saving method started. "+this.state.heightWhenKeyboardOpened+" "+this.state.normalScreenHeight)
 
@@ -120,17 +135,22 @@ export default class CreateARoomID extends React.Component {
                 if (roomID !== '') {
                     //console.warn("Room created." + roomID);
 
+                    this.setState({
+                        roomId: roomID
+                    })
+
                     firebase.database().ref('rooms/' + roomID + '/' + this.state.phone).set({
                         name: this.state.name,
                         phone: this.state.phone,
                         partnerPhone: this.state.partnerNum,
                         status: 'no status',
-                        imageUrl: 'not set'
+                        imageUrl: 'https://image.flaticon.com/icons/png/512/149/149074.png'
                     }, function (error) {
                         if (error) {
                             Alert.alert("Process failed", "Can't add you to this room.Please try again by creating a new room.");
                             this.setState({
-                                roomCreating: false
+                                roomCreating: false,
+
                             })
                         } else {
 
@@ -142,7 +162,7 @@ export default class CreateARoomID extends React.Component {
 
 
                                 this.saveDataLocally().then(result => {
-                                 
+
                                     this.props.navigation.navigate('App');
 
                                 }).catch(error => {
@@ -182,41 +202,23 @@ export default class CreateARoomID extends React.Component {
                 })
             }
 
-
-
         }
 
-
-
     }
-
-    writeToClipboard = async () => {
-
-
-
-        await Clipboard.setString(this.state.roomId);
-
-        this.setState({
-            copyButtonText: 'Copied to the clipboard'
-        })
-
-    }
-
-
 
     render() {
 
         let { height, width } = Dimensions.get('window');
         return (
 
-            <ImageBackground source={require('../images/backThree.jpg')} style={{ flex: 1, width: null, height: null }}>
+            <ImageBackground source={require('../images/starback.jpg')} style={{ flex: 1, width: null, height: null }}>
 
 
                 {this.state.roomCreating ?
 
                     <View style={styles.container}>
 
-                        <ActivityIndicator color='#fff'/>
+                        <ActivityIndicator color='#fff' />
 
                     </View>
 
@@ -258,7 +260,7 @@ export default class CreateARoomID extends React.Component {
                     You can't change the his/her number after you created the room. </Text>
 
                         <Button rounded
-                            style={{ width: width * 0.8, justifyContent: 'center', alignSelf: 'center', marginTop: 10, backgroundColor: '#DAA520', elevation: 7 }}
+                            style={{ width: width * 0.8, justifyContent: 'center', alignSelf: 'center', marginTop: 10, backgroundColor: '#A9A9A9', elevation: 7 }}
                             onPress={this.createTheRoom}>
 
                             <Text style={{ color: '#F5FCFF', fontSize: 16, alignSelf: 'center' }}>Create the room</Text>

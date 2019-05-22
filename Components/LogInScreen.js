@@ -1,11 +1,12 @@
 import React from 'react';
-import { Alert, StyleSheet, Text, View, TextInput, Dimensions, Keyboard, ImageBackground } from 'react-native';
+import { Alert, StyleSheet, Text, View, TextInput, Dimensions, Keyboard, ImageBackground,ActivityIndicator,YellowBox } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import User from '../User';
 
 import firebase from 'firebase';
 
 import { Button, Toast } from 'native-base';
+import _ from 'lodash';
 
 
 export default class LogInScreen extends React.Component {
@@ -17,9 +18,13 @@ export default class LogInScreen extends React.Component {
   state = {
     phone: '',
     name: '',
+    roomId: '',
     partnerNum: '',
+    status: '',
+    image: '',
     heightWhenKeyboardOpened: 0,
-    normalScreenHeight: 0
+    normalScreenHeight: 0,
+    logginStarted : false
 
   }
 
@@ -54,61 +59,107 @@ export default class LogInScreen extends React.Component {
 
   }
 
+  saveDataToLocalStorage = async () => {
+
+ 
+    await AsyncStorage.setItem('userPhone', this.state.phone);
+    await AsyncStorage.setItem('roomId', this.state.roomId);
+    await AsyncStorage.setItem('partnerPhone', this.state.partnerNum);
+    await AsyncStorage.setItem('userName', this.state.name);
+    await AsyncStorage.setItem('userStatus', this.state.status);
+    await AsyncStorage.setItem('userImageUrl', this.state.image);
+    await AsyncStorage.setItem('heightWhenKeyOpened', this.state.heightWhenKeyboardOpened);
+    await AsyncStorage.setItem('normalScreenHeight', this.state.normalScreenHeight);
+    await AsyncStorage.setItem('loggedIn', 'true');
+
+  }
+
   submitForm = async () => {
+
+    YellowBox.ignoreWarnings(['Setting a timer']);
+        const _console = _.clone(console);
+        console.warn = message => {
+            if (message.indexOf('Setting a timer') <= -1) {
+                _console.warn(message);
+            }
+        };
 
     if (this.state.phone.length < 10) {
       Alert.alert("Error", "Phone number is not valid")
-    } else if (this.state.name.length < 3) {
-      Alert.alert("Error", "Name should include atleast three letters")
-    } else if (this.state.partnerNum.length < 10) {
+    } else if (this.state.roomId.length == 0) {
       Alert.alert("Error", "Partner's phone number is not valid")
     } else {
       //Save the user
       try {
         // console.warn("Saving method started. "+this.state.heightWhenKeyboardOpened+" "+this.state.normalScreenHeight)
 
-        await AsyncStorage.setItem('userPhone', this.state.phone);
-        await AsyncStorage.setItem('partnerPhone', this.state.partnerNum);
-        await AsyncStorage.setItem('userName', this.state.name);
-        await AsyncStorage.setItem('userStatus', 'no status');
-        await AsyncStorage.setItem('userImageUrl', 'not set');
-        await AsyncStorage.setItem('heightWhenKeyOpened', this.state.heightWhenKeyboardOpened);
-        await AsyncStorage.setItem('normalScreenHeight', this.state.normalScreenHeight);
+        this.setState({
+          logginStarted: true
+        })
 
-        User.phone = this.state.phone;
-        User.name = this.state.name;
-        User.status = 'no status';
-        User.imageUrl = 'not set';
+        firebase.database().ref('rooms/'+this.state.roomId+'/').child(this.state.phone).once('value',function(snapshot){
+          if(snapshot.exists()){
 
-        firebase.database().ref('users/' + User.phone).set({ User }, function (error) {
-          if (error) {
-            // The write failed...
-            Alert.alert("Unexpected error", "This problem may occur because of the failure of your connection. Please check and try again.");
-          } else {
-            this.props.navigation.navigate('App');
+            let stringifyObject = JSON.stringify(snapshot)
+            let obj = JSON.parse(stringifyObject);
+            obj.key = snapshot.key
+
+            const userName = JSON.stringify(obj.name);
+            const userPhone = JSON.stringify(obj.phone);
+            const userStatus = JSON.stringify(obj.status);
+            const userParnerPhone = JSON.stringify(obj.partnerPhone);
+            const userImageUrl = JSON.stringify(obj.imageUrl);
+
+            const formattedPhone = userPhone.replace(/^"(.*)"$/, '$1');
+            const formattedUserPhone = userParnerPhone.replace(/^"(.*)"$/, '$1');
+            const formattedName = userName.replace(/^"(.*)"$/, '$1');
+            const formattedUserUri = userImageUrl.replace(/^"(.*)"$/, '$1');
+            const formattedUserStatus = userStatus.replace(/^"(.*)"$/, '$1');
+
+
+            this.setState({
+              phone: formattedPhone,
+              name: formattedName,
+              partnerNum: formattedUserPhone,
+              status: formattedUserStatus,
+              image: formattedUserUri
+              
+            })
+
+            this.saveDataToLocalStorage().then(result => {
+              this.props.navigation.navigate('App');
+
+            }).catch(error => {
+              Alert.alert("Process failed.", "Error occured. Check your network connection status and try again.")
+              this.setState({
+                logginStarted: false
+              })
+
+            })
+
+          }else{
+            Alert.alert("Process failed.", "You have no permission to enter this room. Please make sure you have entered the correct room id.")
+            this.setState({
+              logginStarted: false
+            })
           }
-        }.bind(this));
+        }.bind(this))
 
       } catch (e) {
-        // saving error
-        console.warn("firebase exception: " + e.message);
+        // room not found in the db
+        Alert.alert("Room not found.", "You have entered an invalid room id. Make sure you have entered the correct room id.")
+        this.setState({
+          logginStarted: false
+        })
       }
-
-
-
     }
-  }
-
-  savingStuff = async () => {
-
-
   }
 
   render() {
     let { height, width } = Dimensions.get('window');
     return (
 
-      <ImageBackground source={require('../images/backThree.jpg')} style={{ flex: 1, width: null, height: null }}>
+      <ImageBackground source={require('../images/starback.jpg')} style={{ flex: 1, width: null, height: null }}>
 
         <View style={styles.container}>
 
@@ -121,32 +172,26 @@ export default class LogInScreen extends React.Component {
             onChangeText={this.handleChange('phone')} />
 
           <TextInput
-            placeholder="Your name"
-            placeholderTextColor='#A9A9A9'
-            style={styles.input}
-            value={this.state.name}
-            onChangeText={this.handleChange('name')} />
-
-          <TextInput
             placeholder="Room id"
             placeholderTextColor='#A9A9A9'
             keyboardType="number-pad"
             style={styles.input}
-            value={this.state.partnerNum}
-            onChangeText={this.handleChange('partnerNum')} />
+            value={this.state.roomId}
+            onChangeText={this.handleChange('roomId')} />
 
           <Text style={{ color: '#F5FCFF', fontSize: 14, width: 340, paddingRight: 10, paddingLeft: 10 }}>*Make sure that you and your partner use the same room id here</Text>
 
           <Button rounded
-            style={{ width: width * 0.8, justifyContent: 'center', alignSelf: 'center', marginTop: 10, backgroundColor: '#DAA520', elevation: 7 }}
+            style={{ width: width * 0.8, justifyContent: 'center', alignSelf: 'center', marginTop: 10, backgroundColor: '#DAA520', elevation: 9 }}
             onPress={this.submitForm}>
+              <Text style={{ color: '#F5FCFF', fontSize: 16, alignSelf: 'center' }}> {this.state.logginStarted ? null : 'Join the room'} </Text>
 
-            <Text style={{ color: '#F5FCFF', fontSize: 16, alignSelf: 'center' }}>Join the room</Text>
+  {this.state.logginStarted ? <ActivityIndicator size="small" color="#fff" /> :  null}
 
           </Button>
 
           <Button rounded
-            style={{ position: 'absolute', bottom: 0, width: width * 0.8, justifyContent: 'center', marginBottom: 30, alignSelf: 'center', backgroundColor: '#DAA520', elevation: 7 }}
+            style={{ position: 'absolute', bottom: 0, width: width * 0.8, justifyContent: 'center', marginBottom: 30, alignSelf: 'center', backgroundColor: '#A9A9A9', elevation: 9 }}
             onPress={() => this.props.navigation.navigate('createANewRoom')}>
 
             <Text style={{ color: '#F5FCFF', fontSize: 16, alignSelf: 'center' }}>Create a new room</Text>

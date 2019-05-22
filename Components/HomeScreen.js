@@ -1,7 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator, Image, ImageBackground } from 'react-native';
-
-import User from '../User';
+import { Alert,View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator, Image, ImageBackground } from 'react-native';
 
 import firebase from 'firebase';
 
@@ -57,10 +55,13 @@ export default class HomeScreen extends React.Component {
 
     state = {
         users: [],
+        roomid: '',
         ownerPhone: '',
+        ownerName: 'Not found',
         partUserName: 'user not found',
         partnerPhone: 'partner not found',
         partnerStatus: 'No status',
+        userImageUrl: 'https://image.flaticon.com/icons/png/512/149/149074.png',
         partnerImgUrl: 'https://image.flaticon.com/icons/png/512/149/149074.png',
         loading: true
     }
@@ -84,6 +85,26 @@ export default class HomeScreen extends React.Component {
 
     }
 
+    getDataFromAsyncStorage = async () => {
+
+        const roomID = await AsyncStorage.getItem('roomId');
+        const userName = await AsyncStorage.getItem('userName');
+        const userPhone = await AsyncStorage.getItem('userPhone');
+        const userImage = await AsyncStorage.getItem('userImageUrl');
+
+        const partnerPhone = await AsyncStorage.getItem('partnerPhone');
+
+
+        this.setState({
+            roomid: roomID,
+            ownerPhone: userPhone,
+            ownerName: userName,
+            userImageUrl: userImage,
+            partnerPhone: partnerPhone
+
+        })
+    }
+
 
     async componentWillMount() {
 
@@ -98,61 +119,47 @@ export default class HomeScreen extends React.Component {
         //  await this.getPartnerNum();
         try {
 
-            const foundPartPhone = await AsyncStorage.getItem('partnerPhone');
-            const userPhone = await AsyncStorage.getItem('userPhone');
+            this.getDataFromAsyncStorage().then(result => {
 
+    
 
-
-            if (foundPartPhone !== null) {
-                //console.warn("Done . Data found" + foundPartPhone);
-
-                firebase.database().ref('users/' + foundPartPhone + '/User').once('value').then(snap => {
-
+                firebase.database().ref('rooms/' + this.state.roomid + '/' + this.state.partnerPhone).once('value', function (snap) {
                     if (snap.exists()) {
+
 
                         let stringifyObject = JSON.stringify(snap)
                         let obj = JSON.parse(stringifyObject);
                         obj.key = snap.key
+
                         const partName = JSON.stringify(obj.name);
                         const partStatus = JSON.stringify(obj.status);
+                        const partImageUrl = JSON.stringify(obj.imageUrl);
 
-                        const partImgUr = JSON.stringify(obj.imageUrl);
-
-
-                        const formattedName = partName.replace(/^"(.*)"$/, '$1');
-                        const formattedUri = partImgUr.replace(/^"(.*)"$/, '$1');
-
-                        //console.warn("This is the uri:   "+formattedUri);
+                        const formattedPartName = partName.replace(/^"(.*)"$/, '$1');
+                        const formattedPartUri = partImageUrl.replace(/^"(.*)"$/, '$1');
+                        const formattedPartStatus = partStatus.replace(/^"(.*)"$/, '$1');
 
                         this.setState({
-                            ownerPhone: userPhone,
-                            partUserName: formattedName,
-                            partnerPhone: foundPartPhone,
-                            partnerStatus: partStatus,
-                            partnerImgUrl: formattedUri,
+
+                            partUserName: formattedPartName,
+                            partnerStatus: formattedPartStatus,
+                            partnerImgUrl: formattedPartUri,
                             loading: false
 
-                        });
-
-
-
-
-                        // TODO: Handle that users do exist
+                        })
 
                     } else {
-                        console.warn("Not exists!");
+                        Alert.alert("User not found", "Partner not found.");
                     }
+                }.bind(this))
 
-                    // TODO: Handle that users do not exist
-                });
+            }).catch(error => {
+                Alert.alert("Unexpected error occured", "Please try again.");
+            })
 
-
-            } else {
-                console.warn("Not. Data Not found");
-            }
 
         } catch (e) {
-            console.warn("Error " + e.message);
+            Alert.alert("Unexpected error occured", "Please try again.");
             // error reading value
         }
 
@@ -208,7 +215,7 @@ export default class HomeScreen extends React.Component {
         const uri = "https://facebook.github.io/react-native/docs/assets/favicon.png";
         return (
 
-            <ImageBackground source={require('../images/backThree.jpg')} style={{ flex: 1, width: null, height: null }}>
+            <ImageBackground source={require('../images/starback.jpg')} style={{ flex: 1, width: null, height: null }}>
 
                 <View style={{ flex: 1, backgroundColor: 'transparent', alignItems: 'center', flexDirection: 'column', justifyContent: 'center' }}>
 
@@ -222,103 +229,82 @@ export default class HomeScreen extends React.Component {
                     </Header>
 
 
-<View style={{  flexDirection: 'row',marginRight:45, marginLeft: 45}} >
+                    <View style={{ flexDirection: 'row', marginRight: 45, marginLeft: 45 }} >
 
-                    <Content contentContainerStyle={{ alignItems: 'center'}}  >
+                        <Content contentContainerStyle={{ alignItems: 'center', marginBottom:40 }}  >
 
+                            <TouchableOpacity
+                                // onPress={() => this.props.navigation.navigate('chatScreen', item)}
+                                //source={{ uri: this.state.partnerImgUrl}}
+                                style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, elevation: 10 }]}>
 
-                        <TouchableOpacity
-                            // onPress={() => this.props.navigation.navigate('chatScreen', item)}
-                            //source={{ uri: this.state.partnerImgUrl}}
-                            style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, elevation: 10 }]}>
+                                <Image large style={styles.profileImg} source={{ uri: this.state.userImageUrl }} />
 
-                            <Image large style={styles.profileImg} source={{ uri: this.state.partnerImgUrl }} />
+                            </TouchableOpacity>
 
-                        </TouchableOpacity>
+                            <Text style={{ fontSize: 18, color: '#fff', marginTop: 10, fontStyle: 'italic' }}>{this.state.ownerName}</Text>
 
-                        <Text style={{ fontSize: 18, color: '#fff', marginTop: 10, fontStyle: 'italic' }}>{this.state.partUserName}</Text>
+                            <Text style={{ fontSize: 12, color: '#fff' }}>{this.state.ownerPhone}</Text>
 
-                        <Text style={{ fontSize: 12, color: '#fff' }}>{this.state.partnerPhone}</Text>
+                        </Content>
 
-                        <Text style={{ fontSize: 10, color: '#fff' }}>{this.state.partnerStatus}</Text>
-
-                    </Content>
-
-                    <Content contentContainerStyle={{ alignItems: 'center'}}  >
+                        <Content contentContainerStyle={{ alignItems: 'center' }}  >
 
 
-                        <TouchableOpacity
-                            // onPress={() => this.props.navigation.navigate('chatScreen', item)}
-                            //source={{ uri: this.state.partnerImgUrl}}
-                            style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, elevation: 10 }]}>
+                            <TouchableOpacity
+                                // onPress={() => this.props.navigation.navigate('chatScreen', item)}
+                                //source={{ uri: this.state.partnerImgUrl}}
+                                style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1, elevation: 10 }]}>
 
-                            <Image large style={styles.profileImg} source={{ uri: this.state.partnerImgUrl }} />
+                                <Image large style={styles.profileImg} source={{ uri: this.state.partnerImgUrl }} />
 
-                        </TouchableOpacity>
+                            </TouchableOpacity>
 
-                        <Text style={{ fontSize: 18, color: '#fff', marginTop: 10, fontStyle: 'italic' }}>{this.state.partUserName}</Text>
+                            <Text style={{ fontSize: 18, color: '#fff', marginTop: 10, fontStyle: 'italic' }}>{this.state.partUserName}</Text>
 
-                        <Text style={{ fontSize: 12, color: '#fff' }}>{this.state.partnerPhone}</Text>
+                            <Text style={{ fontSize: 12, color: '#fff' }}>{this.state.partnerPhone}</Text>
 
-                        <Text style={{ fontSize: 10, color: '#fff' }}>{this.state.partnerStatus}</Text>
+                        </Content>
 
-                    </Content>
+                    </View>
 
-                    </View> 
+                    <View style={{ flexDirection: 'row', marginBottom: 30, position: 'absolute', bottom: 0 }}>
 
-                    <View style={{flexDirection: 'row', marginBottom: 30,position: 'absolute',bottom:0}}>
+                        <Button transparent onPress={() => this.props.navigation.navigate('chatScreen', {
+                            'personPhone': this.state.partnerPhone,
+                            'personName': this.state.partUserName,
+                            'ownerPhone': this.state.ownerPhone
+                        })}
+                            style={{
+                                alignSelf: 'center', alignItems: 'center',
+                                borderWidth: 1, borderColor: '#fff', borderRadius: 60, paddingLeft: 2, paddingTop: 24, paddingBottom: 24, paddingRight: 2, marginRight: 20
+                            }}>
 
-                    <Button transparent   onPress={() => this.props.navigation.navigate('chatScreen', {
-                                'personPhone': this.state.partnerPhone,
-                                'personName': this.state.partUserName,
-                                'ownerPhone': this.state.ownerPhone
-                            })}
-                             style={{ alignSelf: 'center', alignItems: 'center',
-                    borderWidth: 1, borderColor: '#fff', borderRadius: 60, paddingLeft: 2,paddingTop: 24, paddingBottom: 24,paddingRight: 2, marginRight: 20 }}>
-                                
-                                {this.state.loading ? <ActivityIndicator style={{width: 40}}size="small" color="#fff" /> : null}
-                                {this.state.loading ? null : <Icon large name='md-phone-portrait' style={{ color: '#fff' }} />}
-                               
-                            </Button>
+                            {this.state.loading ? <ActivityIndicator style={{ width: 40 }} size="small" color="#fff" /> : null}
+                            {this.state.loading ? null : <Icon large name='md-phone-portrait' style={{ color: '#fff' }} />}
 
-                            <Button transparent onPress={() => this.props.navigation.navigate('viewGallery')} style={{ alignSelf: 'center', 
-                   alignItems: 'center', borderWidth: 1, borderColor: '#fff', borderRadius: 60, paddingTop: 25, paddingBottom: 25 , marginRight: 20}}>
-                          {this.state.loading ? <ActivityIndicator style={{width: 43}}size="small" color="#fff" /> : null}
-                          {this.state.loading ? null : <Icon large name='md-photos' style={{ color: '#fff' }} />}
-                                
-                            </Button>
+                        </Button>
 
-                            <Button transparent onPress={() => this.props.navigation.navigate('userProfile')} style={{ alignSelf: 'center', 
-                    borderWidth: 1, borderColor: '#fff', borderRadius: 60, paddingTop: 25, paddingBottom: 25 }}>
+                        <Button transparent onPress={() => this.props.navigation.navigate('viewGallery')} style={{
+                            alignSelf: 'center',
+                            alignItems: 'center', borderWidth: 1, borderColor: '#fff', borderRadius: 60, paddingTop: 25, paddingBottom: 25, marginRight: 20
+                        }}>
+                            {this.state.loading ? <ActivityIndicator style={{ width: 43 }} size="small" color="#fff" /> : null}
+                            {this.state.loading ? null : <Icon large name='md-photos' style={{ color: '#fff' }} />}
 
-{this.state.loading ? <ActivityIndicator style={{width: 43}}size="small" color="#fff" /> : null}
-                          {this.state.loading ? null : <Icon large name='md-person' style={{ color: '#fff' }} />}
-                               
-                            </Button>
+                        </Button>
 
-                            </View>
+                        <Button transparent onPress={() => this.props.navigation.navigate('userProfile')} style={{
+                            alignSelf: 'center',
+                            borderWidth: 1, borderColor: '#fff', borderRadius: 60, paddingTop: 25, paddingBottom: 25
+                        }}>
 
+                            {this.state.loading ? <ActivityIndicator style={{ width: 43 }} size="small" color="#fff" /> : null}
+                            {this.state.loading ? null : <Icon large name='md-person' style={{ color: '#fff' }} />}
 
-                   
+                        </Button>
 
-
-                    
-
-
-
-
-                            
-                           
-
-                    
-
-                   
-
-
-
-
-
-
+                    </View>
 
 
                 </View>
@@ -350,13 +336,13 @@ const styles = StyleSheet.create({
         borderRadius: 5
     },
     profileImgContainer: {
-        height: 90,
-        width: 90,
-        borderRadius: 50,
+        height: 100,
+        width: 100,
+        borderRadius: 60,
         overflow: 'hidden'
     },
     profileImg: {
-        height: 90,
-        width: 90
+        height: 100,
+        width: 100
     },
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Platform, StyleSheet, TextInput, Alert, TouchableOpacity, Dimensions, Image, ImageBackground } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, TextInput, Alert, TouchableOpacity, Dimensions, Image, ImageBackground,YellowBox } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import User from '../User';
 
@@ -9,6 +9,8 @@ import firebase from 'firebase';
 import ImagePicker from 'react-native-image-picker';
 
 import RNFetchBlob from 'rn-fetch-blob'
+
+import _ from 'lodash';
 
 const Blob = RNFetchBlob.polyfill.Blob
 const fs = RNFetchBlob.fs
@@ -32,12 +34,19 @@ export default class ProfileScreen extends React.Component {
     }
 
     state = {
+        phone: '',
         name: '',
         status: '',
         userImageUrl: 'https://avatars0.githubusercontent.com/u/12028011?v=3&s=200',
+        roomId: '',
+
+        backUpName: '',
+        backUpStatus: '',
+        backUpUrl: '',
+
         showSaveText: true,
         dataSaved: false,
-        saveButtonColor: '#DAA520',
+        saveButtonColor: '#A9A9A9',
         dataSaving: false
 
     }
@@ -47,19 +56,21 @@ export default class ProfileScreen extends React.Component {
 
     async componentDidMount() {
 
+        const phone = await AsyncStorage.getItem('userPhone');
         const uName = await AsyncStorage.getItem('userName');
         const uStatus = await AsyncStorage.getItem('userStatus');
         const uImUrl = await AsyncStorage.getItem('userImageUrl');
-
-        User.name = uName;
-        User.status = uStatus;
-        User.imageUrl = uImUrl;
-
+        const roomID = await AsyncStorage.getItem('roomId');
 
         this.setState({
+            phone: phone,
             name: uName,
             status: uStatus,
             userImageUrl: uImUrl,
+            roomId: roomID,
+            backUpName: uName,
+            backUpStatus: uStatus,
+            backUpUrl: uImUrl
 
         });
 
@@ -69,18 +80,18 @@ export default class ProfileScreen extends React.Component {
 
     static navigationOptions = {
 
-        header : null
+        header: null
         //title: 'Update Profile',
-       // headerTintColor: '#fff',
+        // headerTintColor: '#fff',
         //headerTitleStyle: {
-       //     fontWeight: 'normal',
-       //     color: '#fff',
-       // },
+        //     fontWeight: 'normal',
+        //     color: '#fff',
+        // },
 
-       // headerStyle: {
-       //     backgroundColor: '#1f5d64',
-      //      color: '#fff'
-      //  },
+        // headerStyle: {
+        //     backgroundColor: '#1f5d64',
+        //      color: '#fff'
+        //  },
 
     }
 
@@ -90,40 +101,48 @@ export default class ProfileScreen extends React.Component {
     }
 
     saveData = async () => {
+
+        YellowBox.ignoreWarnings(['Setting a timer']);
+        const _console = _.clone(console);
+        console.warn = message => {
+            if (message.indexOf('Setting a timer') <= -1) {
+                _console.warn(message);
+            }
+        };
+
         if (this.state.name.length < 3) {
             Alert.alert('Error', 'Please enter valid name.');
         } else {
-            this.setState({
-                showSaveText: false,
-                dataSaving: true
-            });
-
+          
             var updates = {};
             var changesFound = false
-            // updates['/posts/' + newPostKey] = postData;
-            // updates['/user-posts/' + uid + '/' + newPostKey] = postData;
 
-            // return firebase.database().ref().update(updates);
-
-            if (this.state.name !== User.name) {
+            if (this.state.name !== this.state.backUpName) {
                 await AsyncStorage.setItem('userName', this.state.name);//Update the data in async storage
-                updates['users/' + User.phone + '/User/name'] = this.state.name;
+                updates['rooms/' + this.state.roomId + '/' + this.state.phone + '/name'] = this.state.name;
                 changesFound = true
 
             }
-            if (this.state.status !== User.status) {
+            if (this.state.status !== this.state.backUpStatus) {
                 await AsyncStorage.setItem('userStatus', this.state.status);
-                updates['users/' + User.phone + '/User/status'] = this.state.status;
+                updates['rooms/' + this.state.roomId + '/' + this.state.phone + '/status'] = this.state.status;
                 changesFound = true
             }
-            if (this.state.userImageUrl !== User.imageUrl) {
-               // console.warn("Profile pic have changed");
+            if (this.state.userImageUrl !== this.state.backUpUrl) {
+                // console.warn("Profile pic have changed");
                 await AsyncStorage.setItem('userImageUrl', this.state.userImageUrl);
-                updates['users/' + User.phone + '/User/imageUrl'] = this.state.userImageUrl;
+                updates['rooms/' + this.state.roomId + '/' + this.state.phone + '/imageUrl'] = this.state.userImageUrl;
                 changesFound = true
             }
 
             if (changesFound) {
+
+                
+                this.setState({
+                    showSaveText: false,
+                    dataSaving: true
+                });
+
                 // console.warn("changes found and will save");
                 changesFound = false
                 //firebase.database().ref('users').child(User.phone).update({ User });
@@ -140,7 +159,7 @@ export default class ProfileScreen extends React.Component {
                     }
                 }.bind(this));
             } else {
-               // console.warn("nothing to save");
+                // console.warn("nothing to save");
             }
         }
 
@@ -164,17 +183,17 @@ export default class ProfileScreen extends React.Component {
 
             fs.readFile(uploadUri, 'base64')
                 .then((data) => {
-                 
+
                     return Blob.build(data, { type: `${mime};BASE64` })
                 })
                 .then((blob) => {
-                  
+
                     uploadBlob = blob
                     return imageRef.put(blob, { contentType: mime })
                 })
                 .then(() => {
                     uploadBlob.close()
-                   
+
 
                     return imageRef.getDownloadURL()
                 })
@@ -234,7 +253,7 @@ export default class ProfileScreen extends React.Component {
 
 
     logOut = async () => {
-        await AsyncStorage.clear();
+        await AsyncStorage.setItem('loggedIn', 'false');
         this.props.navigation.navigate('Auth');
 
     }
@@ -244,90 +263,102 @@ export default class ProfileScreen extends React.Component {
 
         return (
 
-            <ImageBackground source={require('../images/backThree.jpg')} style={{ flex: 1, width: null, height: null }}>
+            <ImageBackground source={require('../images/starback.jpg')} style={{ flex: 1, width: null, height: null }}>
 
-     
-            <Container style={{
-                flex: 1, backgroundColor: 'transparent', alignItems: 'center',
-                flexDirection: 'row', justifyContent: 'center'
-            }}>
 
-                <Content contentContainerStyle={{ alignItems: 'center' }}  >
+                <Container style={{
+                    flex: 1, backgroundColor: 'transparent', alignItems: 'center',
+                    flexDirection: 'row', justifyContent: 'center'
+                }}>
 
-                    <Form style={{
-                        flex: 1, width: width * 0.9, height: height * 0.8,
-                        alignItems: 'center', justifyContent: 'center'
-                    }}>
+                    <Content contentContainerStyle={{ alignItems: 'center' }}  >
 
-                        <TouchableOpacity
-                            //onPress={() => this.props.navigation.navigate('chatScreen', item)}
-                            style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1 }]}>
+                        <Form style={{
+                            flex: 1, width: width * 0.9, height: height * 0.8,
+                            alignItems: 'center', justifyContent: 'center'
+                        }}>
 
-                            <Image large source={{uri: this.state.userImageUrl}}  style={styles.profileImg} />
+                            <TouchableOpacity
+                                //onPress={() => this.props.navigation.navigate('chatScreen', item)}
+                                style={[styles.profileImgContainer, { borderColor: '#fff', borderWidth: 1 }]}>
 
-                        </TouchableOpacity>
+                                <Image large source={{ uri: this.state.userImageUrl }} style={styles.profileImg} />
 
-                        <TouchableOpacity
-                            onPress={this.changePicture}>
-                            <Text style={{ fontStyle: 'italic', fontSize: 14, color: '#EAC117', marginBottom: 10, marginTop: 3, textDecorationLine: 'underline' }}>
-                                Change display picture
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                onPress={this.changePicture}>
+                                <Text style={{ fontStyle: 'italic', fontSize: 14, color: '#EAC117', marginBottom: 10, marginTop: 3, textDecorationLine: 'underline' }}>
+                                    Change display picture
                             </Text>
-                        </TouchableOpacity>
+                            </TouchableOpacity>
 
+                            <Text style={{ fontSize: 16, color: '#fff', marginBottom: 8 }}>
+                                {this.state.phone}
+                            </Text>
 
-                        <Text style={{ fontSize: 16, color: '#fff', marginBottom: 15, marginTop: 3 }}>
-                            {User.phone}
-                        </Text>
-
-                        <TextInput
-                            style={styles.input}
-                            value={this.state.name}
-                            onChangeText={this.handleChange('name')} />
-
-                        <TextInput
-                            multiline={true}
-                            numberOfLines={4}
-                            style={styles.input}
-                            value={this.state.status}
-                            onChangeText={this.handleChange('status')} />
-
-                        <Button rounded
-                            style={{
-
-                                width: width * 0.9, justifyContent: 'center', alignSelf: 'center', alignItems: 'center',
-                                marginTop: 8, backgroundColor: this.state.saveButtonColor, elevation: 5
-                            }}
-                            onPress={this.state.dataSaved ? console.log("Once saved") : this.saveData}>
-
-                            <Text style={{ color: '#F5FCFF', fontSize: 14 }}>{this.state.showSaveText ? " Save changes" : null}</Text>
-                            {this.state.dataSaving ? <ActivityIndicator size="small" color="#fff" /> : null}
-                            <Text style={{ color: '#F5FCFF', fontSize: 14 }}>{this.state.dataSaved ? "Saved successfully" : null}</Text>
+                            <TouchableOpacity
+                                onPress={() => this.props.navigation.navigate('viewRoomData', {
+                                    'roomID': this.state.roomId
+                                })}
+                                style={{ marginBottom: 10 }}>
+                                <Text style={{ fontStyle: 'italic', fontSize: 16, color: '#fff', marginTop: 3, textDecorationLine: 'underline' }}>
+                                    View your room data
+                            </Text>
+                            </TouchableOpacity>
 
 
 
-                        </Button>
 
-                        <Button rounded
-                            style={{
-                                width: width * 0.9, justifyContent: 'center', alignSelf: 'center',
-                                marginTop: 10, backgroundColor: '#a60000', elevation: 5
-                            }}
-                            onPress={this.logOut}>
+                            <TextInput
+                                style={styles.input}
+                                value={this.state.name}
+                                onChangeText={this.handleChange('name')} />
 
-                            <Text style={{ color: '#F5FCFF', fontSize: 14 }}>Log out</Text>
+                            <TextInput
+                                multiline={true}
+                                numberOfLines={4}
+                                style={styles.input}
+                                value={this.state.status}
+                                onChangeText={this.handleChange('status')} />
 
-                        </Button>
+                            <Button rounded
+                                style={{
+
+                                    width: width * 0.9, justifyContent: 'center', alignSelf: 'center', alignItems: 'center',
+                                    marginTop: 8, backgroundColor: this.state.saveButtonColor, elevation: 5
+                                }}
+                                onPress={this.state.dataSaved ? console.log("Once saved") : this.saveData}>
+
+                                <Text style={{ color: '#F5FCFF', fontSize: 14, alignSelf: 'center' }}>{this.state.showSaveText ? " Save changes" : null}</Text>
+                                {this.state.dataSaving ? <ActivityIndicator size="small" color="#fff" /> : null}
+                                <Text style={{ color: '#F5FCFF', fontSize: 14 }}>{this.state.dataSaved ? "Saved successfully" : null}</Text>
 
 
-                    </Form>
 
-                </Content>
+                            </Button>
 
-            </Container>
+                            <Button rounded
+                                style={{
+                                    width: width * 0.9, justifyContent: 'center', alignSelf: 'center',
+                                    marginTop: 10, backgroundColor: '#a60000', elevation: 5
+                                }}
+                                onPress={this.logOut}>
+
+                                <Text style={{ color: '#F5FCFF', fontSize: 14 }}>Log out</Text>
+
+                            </Button>
+
+
+                        </Form>
+
+                    </Content>
+
+                </Container>
 
             </ImageBackground>
 
-       
+
 
         )
     }

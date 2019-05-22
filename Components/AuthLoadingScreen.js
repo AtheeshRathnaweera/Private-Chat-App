@@ -5,7 +5,8 @@ import {
     View,
     Text,
     StyleSheet,
-    Alert
+    Alert,
+    ImageBackground
 } from 'react-native';
 
 import User from '../User';
@@ -14,17 +15,11 @@ import AsyncStorage from '@react-native-community/async-storage';
 import firebase from 'firebase';
 import NetInfo from "@react-native-community/netinfo";
 
-
-
-
 export default class AuthLoadingScreen extends React.Component {
     constructor(props) {
         super(props);
         this.testNetCheck();
     }
-
-   
-
 
     componentWillMount() {
       
@@ -103,10 +98,10 @@ export default class AuthLoadingScreen extends React.Component {
     }
 
     startTheApp = async () => {
+
+        const loggedIn = await AsyncStorage.getItem('loggedIn');
         
-      
-            User.phone = await AsyncStorage.getItem('userPhone');
-            this.props.navigation.navigate(User.phone ? 'App' : 'Auth');//Go to the stack if phone number is available
+            this.props.navigation.navigate(loggedIn == 'true' ? 'App' : 'Auth');//Go to the stack if phone number is available
      
      
     };
@@ -114,11 +109,13 @@ export default class AuthLoadingScreen extends React.Component {
     // Render any loading content that you like here
     render() {
         return (
+            <ImageBackground source={require('../images/starback.jpg')} style={{ flex: 1, width: null, height: null }}>
             <View style={styles.container}>
 
                 <ActivityIndicator color="#fff"/>
                 <StatusBar barStyle="default" />
             </View>
+            </ImageBackground>
         );
     }
 }
@@ -128,7 +125,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#1f5d64',
+        backgroundColor: 'transparent',
     },
     input: {
         padding: 10,
