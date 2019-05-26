@@ -39,6 +39,7 @@ export default class ChatScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            roomId: '',
             person: {
                 name: props.navigation.getParam('personName'),
                 phone: props.navigation.getParam('personPhone'),
@@ -95,10 +96,13 @@ export default class ChatScreen extends React.Component {
 
     }
 
-    componentWillMount() {
+    async componentWillMount() {
 
+        const roomID = await AsyncStorage.getItem('roomId');
 
-        firebase.database().ref('messages').child(this.state.person.ownerPhone).child(this.state.person.phone)
+        console.warn(roomID)
+
+        firebase.database().ref('chats').child(roomID)
             .on('child_added', (value) => {
 
                 this.setState((prevState) => {
@@ -109,6 +113,7 @@ export default class ChatScreen extends React.Component {
                 })
 
                 this.setState({
+                    roomId: roomID,
                     loading: false
                 })
 
@@ -154,15 +159,14 @@ export default class ChatScreen extends React.Component {
 
         if (this.state.textMessage.length > 0) {
 
-            let msgId = firebase.database().ref('messages').child(User.phone).child(this.state.person.phone).push().key;
+            let msgId = firebase.database().ref('chats').child(this.state.roomId).push().key;
             let updates = {};
             let message = {
                 message: this.state.textMessage,
                 time: firebase.database.ServerValue.TIMESTAMP,
                 from: User.phone
             }
-            updates['messages/' + User.phone + '/' + this.state.person.phone + '/' + msgId] = message;
-            updates['messages/' + this.state.person.phone + '/' + User.phone + '/' + msgId] = message;
+            updates['chats/' + this.state.roomId + '/' + msgId] = message;
             firebase.database().ref().update(updates, function (error) {
 
                 if (error) {

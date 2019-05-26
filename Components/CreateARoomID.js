@@ -95,11 +95,26 @@ export default class CreateARoomID extends React.Component {
             if (error) {
                 Alert.alert("User adding failed", "Can't add your partner to this room.Please try again by creating a new room.");
             } else {
-
-
             }
         }.bind(this));
 
+    }
+
+    saveRoomCreationDataInFirebase = async (roomId) => {
+        //room id date by user
+
+        const timeNow = new Date().toLocaleString();
+        const createdByString = this.state.name + " ( " + this.state.phone + " )";
+        const otherUserString = this.state.partnerName + " ( " + this.state.partnerNum + " )";
+
+        firebase.database().ref('rooms/' + roomId + '/roomData').set({
+            createdDate: timeNow,
+            createdBy: createdByString,
+            otherUser: otherUserString
+        }, function (error) {
+            //catch the error and do something
+
+        }.bind(this))
     }
 
     createTheRoom = async () => {
@@ -156,14 +171,22 @@ export default class CreateARoomID extends React.Component {
 
                             //Adding the partner if only creator added successfully
 
-
                             this.savePartnerDataInFirebase(roomID).then(result => {
-
-
 
                                 this.saveDataLocally().then(result => {
 
-                                    this.props.navigation.navigate('App');
+                                    //create the room data node 
+
+                                    this.saveRoomCreationDataInFirebase(roomID).then(result => {
+                                        //naviagate to the app after done all the data saving
+                                        this.props.navigation.navigate('App');
+                                    }).catch(error => {
+                                        Alert.alert("Process failed.", "Error occured. Check your network connection status and try again.")
+                                        this.setState({
+                                            roomCreating: false
+                                        })
+                                    })
+
 
                                 }).catch(error => {
 

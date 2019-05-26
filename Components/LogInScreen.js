@@ -32,6 +32,22 @@ export default class LogInScreen extends React.Component {
     this.setState({ [key]: val })
   }
 
+  componentWillMount(){
+ 
+
+    this.getPreviouslySavedRoomId().then(result => {
+      //console.warn("result : "+result)
+
+      this.setState({
+        roomId : result
+      })
+      
+
+    }).catch(error => {
+      console.warn("Previously saved room id not found");
+    })
+  }
+
   componentDidMount() {
     this.keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -56,6 +72,13 @@ export default class LogInScreen extends React.Component {
       heightWhenKeyboardOpened: shortHeight + '',
       normalScreenHeight: normalHeight + ''
     })
+
+  }
+
+  getPreviouslySavedRoomId = async () =>{
+    const roomId  = await AsyncStorage.getItem('roomId');
+    //console.warn("room id : "+roomId);
+    return roomId
 
   }
 

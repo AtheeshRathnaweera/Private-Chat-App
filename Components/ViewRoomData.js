@@ -15,12 +15,10 @@ export default class ViewRoomData extends React.Component {
         this.state = {
 
             roomId: props.navigation.getParam('roomID'),
-            roomCreatorName: 'Not found',
-            roomCreatorNum: 'Not found',
-            otherUserName: 'Not found',
-            otherUserNum: 'Not found',
-            createdDate: 'Not found',
-            copyButtonText: 'Copy id to the clipboard'
+            roomCreatedBy: 'Not found',
+            roomCreatedDate: 'Not found',
+            otherUserData: 'Not found',
+            copyButtonText: 'Copy the id to the clipboard'
 
         }
     }
@@ -30,6 +28,35 @@ export default class ViewRoomData extends React.Component {
 
         header: null
 
+    }
+
+    componentWillMount() {
+
+        firebase.database().ref('rooms/' + this.state.roomId + '/roomData').once('value', function (snap) {
+            if (snap.exists()) {
+                let stringifyObject = JSON.stringify(snap)
+                let obj = JSON.parse(stringifyObject);
+                obj.key = snap.key
+
+                const createdBy = JSON.stringify(obj.createdBy);
+                const createdDate = JSON.stringify(obj.createdDate);
+                const otherUser = JSON.stringify(obj.otherUser);
+
+                const formattedCreatedBy = createdBy.replace(/^"(.*)"$/, '$1');
+                const formattedCreatedDate = createdDate.replace(/^"(.*)"$/, '$1');
+                const formattedOtherUser = otherUser.replace(/^"(.*)"$/, '$1');
+
+                this.setState({
+                    roomCreatedBy: formattedCreatedBy,
+                    roomCreatedDate: formattedCreatedDate,
+                    otherUserData: formattedOtherUser
+
+                })
+
+            } else {
+                //room data not found
+            }
+        }.bind(this))
     }
 
     writeToClipboard = async () => {
@@ -53,8 +80,10 @@ export default class ViewRoomData extends React.Component {
                     justifyContent: 'center'
                 }}>
 
-                    <View style={{ backgroundColor: 'transparent', alignItems: 'flex-start', 
-                    justifyContent: 'center', borderWidth: 1, borderColor: '#fff',padding:10 }}>
+                    <View style={{
+                        backgroundColor: 'transparent', alignItems: 'flex-start',
+                        justifyContent: 'center', borderWidth: 1, borderColor: '#fff', padding: 10
+                    }}>
 
                         <View style={{ flexDirection: 'row', marginTop: 4 }}>
                             <Text style={{ color: '#fff', fontSize: 15 }}>Room ID : </Text>
@@ -63,25 +92,25 @@ export default class ViewRoomData extends React.Component {
 
                         <View style={{ flexDirection: 'row', marginTop: 4 }}>
                             <Text style={{ color: '#fff', fontSize: 15 }}>Created date : </Text>
-                            <Text style={{ color: '#fff', fontSize: 16 }}>{this.state.createdDate}</Text>
+                            <Text style={{ color: '#fff', fontSize: 16 }}>{this.state.roomCreatedDate}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', marginTop: 4 }}>
                             <Text style={{ color: '#fff', fontSize: 15 }}>Created by : </Text>
-                            <Text style={{ color: '#fff', fontSize: 16 }}>{this.state.roomCreatorName}</Text>
-                            <Text style={{ color: '#fff', fontSize: 16 }}> ( {this.state.roomCreatorNum} )</Text>
+                            <Text style={{ color: '#fff', fontSize: 16 }}>{this.state.roomCreatedBy}</Text>
                         </View>
 
                         <View style={{ flexDirection: 'row', marginTop: 4 }}>
                             <Text style={{ color: '#fff', fontSize: 15 }}>Other user : </Text>
-                            <Text style={{ color: '#fff', fontSize: 16 }}>{this.state.otherUserName}</Text>
-                            <Text style={{ color: '#fff', fontSize: 16 }}> ( {this.state.otherUserNum} )</Text>
+                            <Text style={{ color: '#fff', fontSize: 16 }}>{this.state.otherUserData}</Text>
                         </View>
 
                     </View>
 
-
-                    <Button style={{ backgroundColor: '#A9A9A9', alignSelf: 'center', borderRadius: 20, marginTop: 20, elevation: 10 }}
+                    <Button style={{
+                        position: 'absolute', bottom: 0, backgroundColor: '#A9A9A9', alignSelf: 'center',
+                        borderRadius: 20, marginTop: 20, elevation: 10, paddingLeft: 5, paddingRight: 5, marginBottom: 30
+                    }}
                         onPress={this.writeToClipboard}><Text style={{ color: '#fff' }}>{this.state.copyButtonText}</Text>
                     </Button>
 

@@ -105,6 +105,8 @@ export default class HomeScreen extends React.Component {
         })
     }
 
+  
+
 
     async componentWillMount() {
 
@@ -121,7 +123,7 @@ export default class HomeScreen extends React.Component {
 
             this.getDataFromAsyncStorage().then(result => {
 
-    
+                
 
                 firebase.database().ref('rooms/' + this.state.roomid + '/' + this.state.partnerPhone).once('value', function (snap) {
                     if (snap.exists()) {

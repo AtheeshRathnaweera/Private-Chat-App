@@ -9,11 +9,7 @@ import firebase from 'firebase';
 
 
 export default class ViewGalleryScreen extends React.Component {
-
-
-
-
-
+    
     static navigationOptions = {
 
         header : null
