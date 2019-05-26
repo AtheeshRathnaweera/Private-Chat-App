@@ -11,6 +11,7 @@ import ProfileScreen from './Components/ProfileScreen';
 import ViewGalleryScreen from './Components/ViewGalleryScreen';
 import CreateARoomID from './Components/CreateARoomID';
 import ViewRoomData from './Components/ViewRoomData';
+import CreateANewAlbum from './Components/CreateANewAlbum';
 
 
 // Implementation of HomeScreen, OtherScreen, SignInScreen, AuthLoadingScreen
@@ -22,8 +23,10 @@ const AppStack = createStackNavigator({
   //chatScreen: giftedChatTest,
   userProfile: ProfileScreen,
   viewGallery: ViewGalleryScreen,
-  viewRoomData : ViewRoomData
+  viewRoomData : ViewRoomData,
+  createANewAlbum: CreateANewAlbum
 });
+
 const AuthStack = createStackNavigator({
   LogIn: LogInScreen,
   createANewRoom: CreateARoomID

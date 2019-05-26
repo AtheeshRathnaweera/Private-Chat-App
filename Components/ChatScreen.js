@@ -14,26 +14,26 @@ import AsyncStorage from '@react-native-community/async-storage';
 export default class ChatScreen extends React.Component {
 
     static navigationOptions = {
-        header:null
+        header: null
     }
 
-   // static navigationOptions = ({ navigation }) => {
-   //     return {
+    // static navigationOptions = ({ navigation }) => {
+    //     return {
     //        headerTintColor: '#fff',
-     //       headerStyle: {
-     //           backgroundColor: '#1f5d64',
-                
-     //       },
-      //      headerTitleStyle: {
-      //          fontWeight: 'normal',
-      //      },
-      //      title: navigation.getParam('personName', null),
-           
+    //       headerStyle: {
+    //           backgroundColor: '#1f5d64',
+
+    //       },
+    //      headerTitleStyle: {
+    //          fontWeight: 'normal',
+    //      },
+    //      title: navigation.getParam('personName', null),
 
 
 
 
-     //   }
+
+    //   }
     //}
 
     constructor(props) {
@@ -53,7 +53,7 @@ export default class ChatScreen extends React.Component {
             screenMultiple: 0.79,
             newMessage: false,
             loading: true,
-         
+
 
         }
         this.getHeightWhenKeyOpened()
@@ -102,7 +102,7 @@ export default class ChatScreen extends React.Component {
             roomId: roomID
         })
 
-        firebase.database().ref('rooms/'+roomID+'/chat')
+        firebase.database().ref('rooms/' + roomID + '/chat')
             .on('child_added', (value) => {
 
                 this.setState((prevState) => {
@@ -113,13 +113,13 @@ export default class ChatScreen extends React.Component {
                 })
 
                 this.setState({
-                   
+
                     loading: false
                 })
 
                 try {
                     this.listView.scrollToEnd()
-                
+
                 } catch (e) {
 
                 }
@@ -159,7 +159,7 @@ export default class ChatScreen extends React.Component {
 
         if (this.state.textMessage.length > 0) {
 
-            let msgId = firebase.database().ref('rooms/'+this.state.roomId+'/chat').push().key;
+            let msgId = firebase.database().ref('rooms/' + this.state.roomId + '/chat').push().key;
             let updates = {};
             let message = {
                 message: this.state.textMessage,
@@ -181,7 +181,7 @@ export default class ChatScreen extends React.Component {
 
             this.setState({
                 textMessage: ''
-              
+
             });
 
 
@@ -230,10 +230,6 @@ export default class ChatScreen extends React.Component {
 
     renderRow = ({ item }) => {
         return (
-
-
-
-
             <View style={{
                 flexDirection: 'row',
                 width: '60%',
@@ -245,9 +241,7 @@ export default class ChatScreen extends React.Component {
                 marginBottom: 6,
                 elevation: 5
             }}>
-
-
-
+                
                 <Text multiline={true} style={{ color: item.from === this.state.person.ownerPhone ? '#fff' : '#505050', padding: 7, fontSize: 15, width: '74%' }}>
                     {item.message}
                 </Text>
@@ -271,7 +265,6 @@ export default class ChatScreen extends React.Component {
 
 
                     {this.state.loading ? <ActivityIndicator size="large" color="#fff" style={{ marginTop: 30 }} /> : null}
-
 
                     <FlatList
 
@@ -302,7 +295,7 @@ export default class ChatScreen extends React.Component {
                             style={styles.input}
                             value={this.state.textMessage}
                             onChangeText={this.handleChanges('textMessage')}
-                        
+
                         />
 
                         <Button style={{
