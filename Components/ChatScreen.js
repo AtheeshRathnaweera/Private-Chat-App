@@ -97,12 +97,12 @@ export default class ChatScreen extends React.Component {
     }
 
     async componentWillMount() {
-
         const roomID = await AsyncStorage.getItem('roomId');
+        this.setState({
+            roomId: roomID
+        })
 
-        console.warn(roomID)
-
-        firebase.database().ref('chats').child(roomID)
+        firebase.database().ref('rooms/'+roomID+'/chat')
             .on('child_added', (value) => {
 
                 this.setState((prevState) => {
@@ -113,7 +113,7 @@ export default class ChatScreen extends React.Component {
                 })
 
                 this.setState({
-                    roomId: roomID,
+                   
                     loading: false
                 })
 
@@ -159,14 +159,14 @@ export default class ChatScreen extends React.Component {
 
         if (this.state.textMessage.length > 0) {
 
-            let msgId = firebase.database().ref('chats').child(this.state.roomId).push().key;
+            let msgId = firebase.database().ref('rooms/'+this.state.roomId+'/chat').push().key;
             let updates = {};
             let message = {
                 message: this.state.textMessage,
                 time: firebase.database.ServerValue.TIMESTAMP,
-                from: User.phone
+                from: this.state.person.ownerPhone
             }
-            updates['chats/' + this.state.roomId + '/' + msgId] = message;
+            updates['rooms/' + this.state.roomId + '/chat/' + msgId] = message;
             firebase.database().ref().update(updates, function (error) {
 
                 if (error) {
@@ -239,8 +239,8 @@ export default class ChatScreen extends React.Component {
                 width: '60%',
                 paddingBottom: 2,
                 paddingTop: 2,
-                alignSelf: item.from === User.phone ? 'flex-end' : 'flex-start',
-                backgroundColor: item.from === User.phone ? '#669900' : '#fff',
+                alignSelf: item.from === this.state.person.ownerPhone ? 'flex-end' : 'flex-start',
+                backgroundColor: item.from === this.state.person.ownerPhone ? '#669900' : '#fff',
                 borderRadius: 5,
                 marginBottom: 6,
                 elevation: 5
@@ -248,7 +248,7 @@ export default class ChatScreen extends React.Component {
 
 
 
-                <Text multiline={true} style={{ color: item.from === User.phone ? '#fff' : '#505050', padding: 7, fontSize: 15, width: '74%' }}>
+                <Text multiline={true} style={{ color: item.from === this.state.person.ownerPhone ? '#fff' : '#505050', padding: 7, fontSize: 15, width: '74%' }}>
                     {item.message}
                 </Text>
                 <Right style={{
@@ -256,7 +256,7 @@ export default class ChatScreen extends React.Component {
                     justifyContent: 'flex-start',
                     width: '24%'
                 }}>
-                    <Text style={{ color: item.from === User.phone ? '#fff' : '#505050', fontSize: 11, marginRight: 5 }}>{this.convertTime(item.time)}</Text>
+                    <Text style={{ color: item.from === this.state.person.ownerPhone ? '#fff' : '#505050', fontSize: 11, marginRight: 5 }}>{this.convertTime(item.time)}</Text>
                 </Right>
             </View>
         )
