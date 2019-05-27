@@ -14,7 +14,8 @@ export default class ViewGalleryScreen extends React.Component {
     }
 
     state = {
-        messageList: ["first"]
+        messageList: [],
+        albumName: ''
     }
 
     renderRow = ({ item }) => {

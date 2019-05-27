@@ -14,44 +14,7 @@ export default class HomeScreen extends React.Component {
     static navigationOptions = {
         header: null
     }
-    //static navigationOptions = ({ navigation }) => {
-
-    //     let c = new Date();
-    //    let result = '';
-    //    let time = c.getHours();
-
-    //    if (time < 4) {
-    //        result = " Devils are awake now ! "
-    //    } else if (time < 11) {
-    //         result = " Good Morning ! "
-    //     } else if (time < 14) {
-    //        result = " It's so hot outside!"
-    //    } else if (time < 19) {
-    //        result = " Good Evening !"
-    //    } else if (time < 23) {
-    //        result = " Time to chill with moon !"
-    //    } else if (time < 24) {
-    //         result = " Time to sleep !"
-    //    }
-
-    //    return {
-    //        title: result,
-    //        headerTitleStyle: {
-    //           fontWeight: 'normal',
-    //            color: '#fff',
-    //        },
-
-    //       headerStyle: {
-    //           backgroundColor: 'rgba(52, 52, 52, 0.8)'//#1f5d64
-
-    //       },
-
-    //        headerRight:
-    //             <Button transparent onPress={() => navigation.navigate('userProfile')} style={{ alignSelf: 'center' }}>
-    //                 <Icon name='person' style={{ color: '#fff' }} />
-    //              </Button>
-    //      }
-    //  }
+  
 
     state = {
         users: [],
