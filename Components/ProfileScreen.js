@@ -193,8 +193,6 @@ export default class ProfileScreen extends React.Component {
                 })
                 .then(() => {
                     uploadBlob.close()
-
-
                     return imageRef.getDownloadURL()
                 })
                 .then((url) => {

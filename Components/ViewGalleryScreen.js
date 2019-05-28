@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, FlatList, Text, ActivityIndicator, StyleSheet, TextInput, Alert, TouchableOpacity, Dimensions, Image, ImageBackground } from 'react-native';
+import { View, FlatList, Text, YellowBox, StyleSheet, TextInput, Alert, TouchableOpacity, Dimensions, Image, ImageBackground } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import User from '../User';
 
 import { Container, Card, Button, Thumbnail, CardItem, Right, Icon, Left, Body } from 'native-base';
 import firebase from 'firebase';
 import { TouchableHighlight } from 'react-native-gesture-handler';
+
+import _ from 'lodash';
 
 
 export default class ViewGalleryScreen extends React.Component {
@@ -21,8 +23,16 @@ export default class ViewGalleryScreen extends React.Component {
         albumName: '',
         loading: true
     }
-    
+
     async componentWillMount() {
+
+        YellowBox.ignoreWarnings(['Setting a timer']);
+        const _console = _.clone(console);
+        console.warn = message => {
+            if (message.indexOf('Setting a timer') <= -1) {
+                _console.warn(message);
+            }
+        };
 
         const roomID = await AsyncStorage.getItem('roomId');
 
@@ -49,7 +59,7 @@ export default class ViewGalleryScreen extends React.Component {
             })
     }
 
-    cardClick(){
+    cardClick() {
         console.warn("Card clicked")
     }
 
@@ -57,20 +67,23 @@ export default class ViewGalleryScreen extends React.Component {
         let { height, width } = Dimensions.get('window');
 
         return (
-            <TouchableOpacity onPress={()=>this.props.navigation.navigate('viewPhotos',{'albumId': item.albumId})} activeOpacity={1}>
-            <Card style={{ width: width * 0.9 }}
-            >
+            <TouchableOpacity onPress={() => this.props.navigation.navigate('viewPhotos', {
+                'albumId': item.albumId,
+                'albumName': item.name
+            })} activeOpacity={1}>
+                <Card style={{ width: width * 0.9 }}
+                >
 
-                <CardItem cardBody>
-                    <Image source={{ uri: item.Thumbnail }} style={{ height: 200, width: null, flex: 1 }} />
-                </CardItem>
-                <CardItem style={{ alignContent: 'flex-end', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <CardItem cardBody>
+                        <Image source={{ uri: item.Thumbnail }} style={{ height: 200, width: null, flex: 1 }} />
+                    </CardItem>
+                    <CardItem style={{ alignContent: 'flex-end', flexDirection: 'column', alignItems: 'flex-end' }}>
 
-                    <Text style={{ fontSize: 17 }}>{item.name+" "}</Text>
-                    <Text style={{ fontSize: 12 }}>{item.createdDate}</Text>
+                        <Text style={{ fontSize: 17 }}>{item.name}</Text>
+                        <Text style={{ fontSize: 12 }}>{item.createdDate}</Text>
 
-                </CardItem>
-            </Card>
+                    </CardItem>
+                </Card>
 
             </TouchableOpacity>
         )
@@ -111,7 +124,7 @@ export default class ViewGalleryScreen extends React.Component {
                         <Text style={{ color: '#fff', fontSize: 17 }}> +  Create a new album </Text>
                     </Button>
 
-                   
+
 
                     <FlatList
 
