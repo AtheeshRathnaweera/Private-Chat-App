@@ -1,5 +1,4 @@
 
-
 import { createSwitchNavigator, createStackNavigator, createAppContainer } from 'react-navigation';
 import LogInScreen from './Components/LogInScreen';
 import HomeScreen from './Components/HomeScreen';
@@ -12,6 +11,7 @@ import ViewGalleryScreen from './Components/ViewGalleryScreen';
 import CreateARoomID from './Components/CreateARoomID';
 import ViewRoomData from './Components/ViewRoomData';
 import CreateANewAlbum from './Components/CreateANewAlbum';
+import ViewPhotos from './Components/ViewPhotos';
 
 
 // Implementation of HomeScreen, OtherScreen, SignInScreen, AuthLoadingScreen
@@ -24,7 +24,8 @@ const AppStack = createStackNavigator({
   userProfile: ProfileScreen,
   viewGallery: ViewGalleryScreen,
   viewRoomData : ViewRoomData,
-  createANewAlbum: CreateANewAlbum
+  createANewAlbum: CreateANewAlbum,
+  viewPhotos:ViewPhotos
 });
 
 const AuthStack = createStackNavigator({

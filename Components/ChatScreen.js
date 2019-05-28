@@ -59,10 +59,6 @@ export default class ChatScreen extends React.Component {
 
     componentDidMount() {
 
-
-
-
-
         this.keyboardDidShowListener = Keyboard.addListener(
             'keyboardDidShow',
             this._keyboardDidShow,
@@ -71,9 +67,6 @@ export default class ChatScreen extends React.Component {
             'keyboardDidHide',
             this._keyboardDidHide,
         );
-
-
-
 
     }
 

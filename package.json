@@ -16,6 +16,7 @@
     "react": "16.8.3",
     "react-native": "0.59.8",
     "react-native-gesture-handler": "^1.2.1",
+    "react-native-image-grid": "^1.0.0",
     "react-native-image-picker": "^0.28.1",
     "react-navigation": "^3.9.1",
     "rn-fetch-blob": "^0.10.15"
