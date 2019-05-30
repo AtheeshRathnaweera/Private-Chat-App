@@ -118,7 +118,7 @@ export default class ViewGalleryScreen extends React.Component {
 
                     <Button transparent style={{
                         width: width * 0.9, justifyContent: 'center', alignContent: 'center', alignSelf: 'center', position: 'absolute',
-                        top: 0, elevation: 8, marginTop: 40, borderWidth: 1, borderColor: '#fff', margin: 10
+                        top: 0, elevation: 8, marginTop: 30, borderWidth: 1, borderColor: '#fff', margin: 10
                     }}
                         onPress={() => this.props.navigation.navigate('createANewAlbum')}>
                         <Text style={{ color: '#fff', fontSize: 17 }}> +  Create a new album </Text>
@@ -129,9 +129,10 @@ export default class ViewGalleryScreen extends React.Component {
                     <FlatList
 
                         style={{
-                            marginTop: 13, position: 'absolute', bottom: 0, marginBottom: 5,
+                            marginTop: 16, position: 'absolute', bottom: 0, marginBottom: 5,
                             height: height * 0.85, backgroundColor: 'transparent'
                         }}
+                        
                         data={this.state.albumList}
                         renderItem={this.renderRow}
                         keyExtractor={(item, index) => index.toString()}

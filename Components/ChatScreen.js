@@ -161,10 +161,7 @@ export default class ChatScreen extends React.Component {
 
         } else {
             this.listView.scrollToEnd();
-
         }
-
-
 
     }
 
@@ -178,11 +175,11 @@ export default class ChatScreen extends React.Component {
         this.listView.scrollToEnd();
 
 
-        //console.warn("Keyboard show " + this.state.keyboardOpened + " " + shortHeight + " normal: " + normalHeight + " " + keyboardHeight);
+        //console.warn("Keyboard show " + this.state.heightWhenKeyOpened);
 
         this.setState({
             tempHeight: this.state.heightWhenKeyOpened,
-            screenMultiple: 0.9
+            screenMultiple: 1
         })
 
 

@@ -183,6 +183,7 @@ export default class ProfileScreen extends React.Component {
 
             fs.readFile(uploadUri, 'base64')
                 .then((data) => {
+                    console.warn("read file. "+data)
 
                     return Blob.build(data, { type: `${mime};BASE64` })
                 })
