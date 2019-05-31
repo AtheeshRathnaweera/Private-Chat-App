@@ -12,6 +12,7 @@ import CreateARoomID from './Components/CreateARoomID';
 import ViewRoomData from './Components/ViewRoomData';
 import CreateANewAlbum from './Components/CreateANewAlbum';
 import ViewPhotos from './Components/ViewPhotos';
+import UpdateAAlbum from './Components/UpdateAAlbum';
 
 
 // Implementation of HomeScreen, OtherScreen, SignInScreen, AuthLoadingScreen
@@ -25,7 +26,8 @@ const AppStack = createStackNavigator({
   viewGallery: ViewGalleryScreen,
   viewRoomData : ViewRoomData,
   createANewAlbum: CreateANewAlbum,
-  viewPhotos:ViewPhotos
+  viewPhotos: ViewPhotos,
+  updateAnAlbum : UpdateAAlbum
 });
 
 const AuthStack = createStackNavigator({

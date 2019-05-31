@@ -3,7 +3,7 @@ import { View, Platform, Button, Text, ActivityIndicator, StyleSheet, Modal, Tou
 import AsyncStorage from '@react-native-community/async-storage';
 import User from '../User';
 
-import { Container, Card, Thumbnail, CardItem, Right, Icon, Left, Body } from 'native-base';
+import { Container, Fab } from 'native-base';
 import firebase from 'firebase';
 
 import ImagePicker from 'react-native-image-picker';
@@ -121,10 +121,8 @@ export default class ViewPhoto extends React.Component {
             const uploadUri = Platform.OS === 'ios' ? uri.replace('file://', '') : uri
             let uploadBlob = null
 
-           
-
             const imageRef = firebase.storage().ref('albumPhotos').child(this.state.albumId + (this.state.numberOfPhotosInAlbum + 1))
-           
+
 
             fs.readFile(uploadUri, 'base64')
                 .then((data) => {
@@ -177,6 +175,8 @@ export default class ViewPhoto extends React.Component {
             } else {
                 const source = { uri: response.uri };
 
+                console.warn("This is the image path"+response.path)
+
                 this.uploadToFirebaseImage(response.uri)
                     .then(url => {
                         //alert('uploaded ' + url); 
@@ -199,29 +199,6 @@ export default class ViewPhoto extends React.Component {
 
 
 
-    renderItem = ({ item, itemSize, itemPaddingHorizontal }) => {
-    
-        let { height, width } = Dimensions.get('window');
-
-        return (
-
-            <TouchableOpacity
-                style={{
-                    width: 100,
-                    height: 100,
-                    paddingHorizontal: itemPaddingHorizontal
-                }}
-                onPress={() => { this.ShowModalFunction(true, item) }}>
-
-                <Image
-                    resizeMethod="resize"
-                    style={{ flex: 1 }}
-                    source={{ uri: 'https://facebook.github.io/react-native/docs/assets/favicon.png' }} />
-
-            </TouchableOpacity>
-
-        )
-    }
 
     renderEmptyContainer() {
         let { height, width } = Dimensions.get('window');
@@ -243,6 +220,9 @@ export default class ViewPhoto extends React.Component {
         )
     }
 
+
+  
+
     render() {
         let { height, width } = Dimensions.get('window');
 
@@ -251,10 +231,12 @@ export default class ViewPhoto extends React.Component {
                 URI: img.src,
                 id: String(index),
                 thumbnail: img.src,
-                
+                title: "Image title",
+                description: 'This is the description'
+
             })
         )
-      
+
         return (
 
             <ImageBackground source={require('../images/starback.jpg')} style={{ flex: 1, width: null, height: null }}>
@@ -264,22 +246,30 @@ export default class ViewPhoto extends React.Component {
                     paddingTop: 10
                 }}>
 
-                    <Button style={{
-                        width: width * 0.7, justifyContent: 'center', alignContent: 'center', alignSelf: 'center', position: 'absolute',
-                        top: 2, elevation: 8, borderWidth: 1, borderColor: '#fff', height: height * 0.8,
-                        Color: 'transparent',marginBottom:30
-                    }}
-                        onPress={this.selectAnNewImage}
-                        title={this.state.dataSaving? "Uploading your image":"+ Add a new image"}>
 
-                    </Button>
 
                     <ImageBrowser style={{
                         position: 'absolute',
-                        top: 2, alignSelf: 'center', 
-                    }} 
-                    images={ImageURLs}
-                    topMargin = {30}/>
+                        top: 2, alignSelf: 'center',
+                    }}
+                        images={ImageURLs}
+                        closeText="Go back"
+                        enableTilt={false}
+                        
+                    
+                    />
+
+                    <Button style={{
+                        width: width * 0.7, justifyContent: 'center', alignContent: 'center', alignSelf: 'center', position: 'absolute',
+                        top: 4, elevation: 8, borderWidth: 1, borderColor: '#fff', height: height * 0.8,
+                        Color: 'transparent', marginBottom: 30
+                    }}
+                        onPress={this.selectAnNewImage}
+                        title={this.state.dataSaving ? "Uploading your image..." : "+ Add a new image"}>
+
+                    </Button>
+
+
 
 
                 </Container>

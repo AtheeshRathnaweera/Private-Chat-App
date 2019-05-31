@@ -59,7 +59,7 @@ export default class ViewGalleryScreen extends React.Component {
             })
     }
 
-    cardClick() {
+    editAlbum() {
         console.warn("Card clicked")
     }
 
@@ -67,22 +67,32 @@ export default class ViewGalleryScreen extends React.Component {
         let { height, width } = Dimensions.get('window');
 
         return (
-            <TouchableOpacity onPress={() => this.props.navigation.navigate('viewPhotos', {
+            <TouchableOpacity 
+            onPress={() => this.props.navigation.navigate('viewPhotos', {
                 'albumId': item.albumId,
                 'albumName': item.name
-            })} activeOpacity={1}>
+            })}
+            activeOpacity={1}
+            onLongPress ={()=>this.props.navigation.navigate("updateAnAlbum",{
+                'albumName':item.name,
+                'albumId':item.albumId,
+                'roomID':this.state.roomId
+            })}>
+                
                 <Card style={{ width: width * 0.9 }}
                 >
 
                     <CardItem cardBody>
                         <Image source={{ uri: item.Thumbnail }} style={{ height: 200, width: null, flex: 1 }} />
                     </CardItem>
-                    <CardItem style={{ alignContent: 'flex-end', flexDirection: 'column', alignItems: 'flex-end' }}>
 
-                        <Text style={{ fontSize: 17 }}>{item.name}</Text>
-                        <Text style={{ fontSize: 12 }}>{item.createdDate}</Text>
+                        <CardItem style={{ alignContent: 'flex-end', flexDirection: 'column', alignItems: 'flex-end' }}>
 
-                    </CardItem>
+                            <Text style={{ fontSize: 17 }}>{item.name}</Text>
+                            <Text style={{ fontSize: 12 }}>{item.createdDate}</Text>
+
+                        </CardItem>
+
                 </Card>
 
             </TouchableOpacity>
@@ -132,7 +142,7 @@ export default class ViewGalleryScreen extends React.Component {
                             marginTop: 16, position: 'absolute', bottom: 0, marginBottom: 5,
                             height: height * 0.85, backgroundColor: 'transparent'
                         }}
-                        
+
                         data={this.state.albumList}
                         renderItem={this.renderRow}
                         keyExtractor={(item, index) => index.toString()}
