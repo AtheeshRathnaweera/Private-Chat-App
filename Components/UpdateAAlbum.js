@@ -6,6 +6,9 @@ import User from '../User';
 import { Container, Card, Button, Thumbnail, CardItem, Right, Icon, Left, Body } from 'native-base';
 import firebase from 'firebase';
 
+let roomId = ''
+let albumId = ''
+
 
 export default class UpdateAAlbum extends React.Component {
 
@@ -18,18 +21,18 @@ export default class UpdateAAlbum extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            roomId: props.navigation.getParam('roomID'),
-            albumId: props.navigation.getParam('albumId'),
             albumName: props.navigation.getParam('albumName'),
             photos: [],
             loading: false
 
         }
+        roomId = props.navigation.getParam('roomID')
+        albumId = props.navigation.getParam('albumId')
     }
 
     async componentWillMount() {
-
-        firebase.database().ref('rooms/' + this.state.roomId + '/photos/' + this.state.albumId)
+        
+        firebase.database().ref('rooms/' + roomId + '/photos/' + albumId)
             .on('child_added', (value) => {
 
                 this.setState((prevState) => {
@@ -85,7 +88,7 @@ export default class UpdateAAlbum extends React.Component {
                 marginTop: 5, borderBottomColor: 'white', paddingBottom: 5
             }}>
 
-                <Thumbnail square large source={{ uri: item.src }} />
+                <Thumbnail square large source={{ uri: item.thumbnail }} />
 
                 <View style={{ flexDirection: 'column', marginStart: 10 }}>
                     <Text style={{ fontSize: 17, color: 'white' }}> Item name</Text>
@@ -105,14 +108,53 @@ export default class UpdateAAlbum extends React.Component {
 
         )
     }
+    deleteTheAlbum =() =>{
+        
 
+        firebase.database().ref('rooms/' + roomId + '/albums').child(albumId).remove()
+        .then(function(){
+            //Removed succeded.
 
-    deleteTheAlbum() {
-        console.warn("delete the album method")
+            firebase.database().ref('rooms/'+roomId+"/photos").child(albumId).remove()
+            .then(function(){
+                {this.props.navigation.goBack()}
+            }.bind(this))
+            .catch(function(error){
+                Alert.alert("Unexpected error occured", "Please try again later.");
 
+            })
+           
+        }.bind(this))
+        .catch(function(error){
+            //error occured
+            console.warn("Error occured. "+ error.message)
 
+            Alert.alert("Unexpected error occured", "Please try again later.");
+        });
+
+       
 
     }
+  
+    deleteTheAlbumAlert =()=>{
+        Alert.alert(
+            "Attention !",
+            "Album will be deleted and all the images in this album will automatically lost as well. Do you want to comtinue ? ",
+            [
+                {text : "Yes, Delete this ",
+                 onPress : this.deleteTheAlbum
+                },
+                {
+                    text: "No",
+                    style:'cancel'
+                }
+            ],
+            {cancelable: false},
+        );
+    }
+
+
+ 
 
     renderEmptyContainer() {
         let { height, width } = Dimensions.get('window');
@@ -174,7 +216,7 @@ export default class UpdateAAlbum extends React.Component {
                                     width: width * 0.5, justifyContent: 'center', alignContent: 'center', alignSelf: 'center', elevation: 8,
                                     marginTop: 10, backgroundColor: 'red'
                                 }}
-                                onPress={this.deleteTheAlbum}>
+                                onPress={this.deleteTheAlbumAlert}>
                                 <Text style={{ color: 'white', fontSize: 17 }}> Delete the album </Text>
                             </Button>
 

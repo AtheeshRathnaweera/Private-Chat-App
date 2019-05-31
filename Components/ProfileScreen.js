@@ -177,13 +177,11 @@ export default class ProfileScreen extends React.Component {
             const uploadUri = Platform.OS === 'ios' ? uri.replace('file://', '') : uri
             let uploadBlob = null
 
-
             const imageRef = firebase.storage().ref('images').child('user' + User.phone)
 
 
             fs.readFile(uploadUri, 'base64')
                 .then((data) => {
-                    console.warn("read file. "+data)
 
                     return Blob.build(data, { type: `${mime};BASE64` })
                 })
@@ -225,7 +223,7 @@ export default class ProfileScreen extends React.Component {
 
 
                 // You can also display the image using data:
-                const source = { uri: 'data:image/jpeg;base64,' + response.data };
+                //const source = { uri: 'data:image/jpeg;base64,' + response.data };
                 //console.warn("Received image uri : "+ source);
                 //  this.uploadThePicture(uriSource)
 

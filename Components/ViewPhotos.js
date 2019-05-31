@@ -10,6 +10,8 @@ import ImagePicker from 'react-native-image-picker';
 
 import ImageBrowser from 'react-native-interactive-image-gallery';
 
+import ImageResizer from 'react-native-image-resizer';
+
 import _ from 'lodash';
 
 import RNFetchBlob from 'rn-fetch-blob'
@@ -53,17 +55,18 @@ export default class ViewPhoto extends React.Component {
 
     }
 
-    addNewImageToAlbum = async (url) => {
+    addNewImageToAlbum = async (thumbUrl, url) => {
 
         let newImageId = firebase.database().ref('rooms/' + this.state.roomId + '/photos/' + this.state.albumId).push().key;
         let updates = {};
 
         imageData = {
+            thumbnail: thumbUrl,
             src: url
         }
 
         firebase.database().ref('rooms/' + this.state.roomId + '/albums/' + this.state.albumId).update({
-            Thumbnail: url
+            Thumbnail: thumbUrl
         });
 
         updates['rooms/' + this.state.roomId + '/photos/' + this.state.albumId + "/" + newImageId] = imageData;
@@ -71,11 +74,13 @@ export default class ViewPhoto extends React.Component {
 
             if (error) {
                 Alert.alert("Image not added", "Unexpected error occured.");
-            } else {
-                //Image added successfully
                 this.setState({
                     dataSaving: false
                 })
+            } else {
+                //Image added successfully
+               
+              
             }
         }.bind(this)
         );
@@ -94,13 +99,15 @@ export default class ViewPhoto extends React.Component {
 
         firebase.database().ref('rooms/' + this.state.roomId + '/photos/' + this.state.albumId)
             .on('child_added', (value) => {
+            
 
                 this.setState((prevState) => {
 
                     return {
 
                         photos: [...prevState.photos, value.val()],
-                        numberOfPhotosInAlbum: this.state.photos.length
+                        numberOfPhotosInAlbum: this.state.photos.length,
+                        dataSaving: false
 
                     }
                 })
@@ -114,14 +121,27 @@ export default class ViewPhoto extends React.Component {
             })
     }
 
-    uploadToFirebaseImage(uri, mime = 'application/privateChatApp') {
+    uploadToFirebaseImage(type, uri, mime = 'application/privateChatApp') {
+        this.setState({
+            dataSaving:true
+        })
         //Upload to firebase storage
         return new Promise((resolve, reject) => {
 
             const uploadUri = Platform.OS === 'ios' ? uri.replace('file://', '') : uri
             let uploadBlob = null
+            let imageRef = ''
 
-            const imageRef = firebase.storage().ref('albumPhotos').child(this.state.albumId + (this.state.numberOfPhotosInAlbum + 1))
+            if (type == 0) {
+                
+                //src
+                imageRef = firebase.storage().ref('albumPhotos').child(this.state.albumId + (this.state.numberOfPhotosInAlbum + 1))
+            } else {
+                
+                imageRef = firebase.storage().ref('albumPhotos').child("thumb" + this.state.albumId + (this.state.numberOfPhotosInAlbum + 1))
+            }
+
+           
 
 
             fs.readFile(uploadUri, 'base64')
@@ -148,6 +168,31 @@ export default class ViewPhoto extends React.Component {
         })
     }
 
+    handlingUploading = async (thumbnailUri, OriginalUri) => {
+
+        //console.warn("handlingUpload" + thumbnailUri + " " + OriginalUri)
+
+        this.uploadToFirebaseImage(1, thumbnailUri)
+            .then(thumbnailDownloadUrl => {
+                //alert('uploaded ' + url); 
+
+                this.uploadToFirebaseImage(0, OriginalUri)
+                    .then(originalDownloadUrl => {
+                        this.addNewImageToAlbum(thumbnailDownloadUrl, originalDownloadUrl);//Add the saved image url into the album
+
+                    }).catch(error => this.setState({
+                        dataSaving: false
+                    }))
+
+            })
+            .catch(error => this.setState({
+                dataSaving: false
+            }))
+
+    }
+
+
+
 
     selectAnNewImage = () => {
 
@@ -173,25 +218,44 @@ export default class ViewPhoto extends React.Component {
                     dataSaving: false
                 })
             } else {
-                const source = { uri: response.uri };
+                //const source = { uri: response.uri };
 
-                console.warn("This is the image path"+response.path)
 
-                this.uploadToFirebaseImage(response.uri)
-                    .then(url => {
-                        //alert('uploaded ' + url); 
+                //console.warn(" original size: "+response.fileSize)//500 500 80
 
-                        this.addNewImageToAlbum(url);//Add the saved image url into the album
 
-                        this.setState({
-                            userImageUrl: url
-                        })
-                    })
-                    .catch(error => console.warn(error))
+                ImageResizer.createResizedImage(response.uri, 400, 400, "JPEG", 100, 0, null)
+                    .then((thumbnailResponse) => {
+                        //console.warn("resize image " + thumbnailResponse.uri + " ")
 
-                // You can also display the image using data:
-                // const source = { uri: 'data:image/jpeg;base64,' + response.data };
+                        ImageResizer.createResizedImage(response.uri, 800, 900, "JPEG", 100, 0, null)
+                        .then((originalResponse) => {
+                            //console.warn("resize image " + originalResponse.uri + " ")
 
+                            this.handlingUploading(thumbnailResponse.uri, originalResponse.uri).then(
+                                result => {
+                                    this.setState({
+                                        dataSaving: false
+                                    })
+                                }
+                            ).catch(
+                                error =>
+                                    this.setState({
+                                        dataSaving: false
+                                    })
+                            )
+                            
+                            
+                        }).catch((err) => {
+                           // console.warn("Error occured while image resizing")
+                           Alert.alert("Error occured","Image upload failed. Please try again later.")
+                        });
+                        
+
+                    }).catch((err) => {
+                        //console.warn("Error occured while image resizing")
+                        Alert.alert("Error occured","Image upload failed. Please try again later.")
+                    });
 
             }
         });
@@ -221,7 +285,7 @@ export default class ViewPhoto extends React.Component {
     }
 
 
-  
+
 
     render() {
         let { height, width } = Dimensions.get('window');
@@ -230,8 +294,8 @@ export default class ViewPhoto extends React.Component {
             (img, index) => ({
                 URI: img.src,
                 id: String(index),
-                thumbnail: img.src,
-                title: "Image title",
+                thumbnail: img.thumbnail,
+                title: "Image title "+String(index),
                 description: 'This is the description'
 
             })
@@ -248,15 +312,11 @@ export default class ViewPhoto extends React.Component {
 
 
 
-                    <ImageBrowser style={{
-                        position: 'absolute',
-                        top: 2, alignSelf: 'center',
-                    }}
+                    <ImageBrowser 
                         images={ImageURLs}
                         closeText="Go back"
-                        enableTilt={false}
-                        
-                    
+
+
                     />
 
                     <Button style={{
